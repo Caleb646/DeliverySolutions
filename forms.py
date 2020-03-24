@@ -13,3 +13,11 @@ class LoginForm(FlaskForm):
     password = fields.PasswordField(validators=[validators.required()])
 
 
+class SearchForm(FlaskForm):
+
+    tag_num = fields.IntegerField(validators=[validators.required()])
+
+    designer = fields.SelectField("Designer Name", choices=[])
+
+    client = fields.SelectField("Client Name", choices=[])
+

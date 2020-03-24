@@ -2,7 +2,7 @@ from flask import url_for, render_template, request, flash, redirect
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User
-from forms import LoginForm
+from forms import LoginForm, SearchForm
 from run import *
 
 
@@ -23,6 +23,7 @@ def load_user(username):
     return User(username=user['username'], password=user["password"],
                 email=["email"], roles=user["roles"])
 
+
 @app.route("/")
 @app.route("/home")
 def home():
@@ -30,15 +31,9 @@ def home():
     return render_template("home.html", form=form)
 
 
-@app.route("/admin/home")
-@login_required
-def admin_home():
-
-    return "Hello Admin"
-
-
 @app.route("/login", methods=("POST", "GET"))
 def login():
+    print(current_user)
     if current_user.is_authenticated:
         user = mongo.db.Users.find_one({"username": current_user.username})
         path = User.check_roles(user)
@@ -48,7 +43,6 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = mongo.db.Users.find_one({"username": form.login.data})
-        print(f'user, current user {user, current_user}')
         if user and User.check_pass(user['password'], form.password.data):
             user_obj = User(username=user['username'], password=user["password"],
                     email=["email"], roles=user["roles"])
@@ -62,9 +56,47 @@ def login():
 
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+"""Admin Views Start"""
+
+
+@app.route("/admin", methods=("GET", "POST"))
+@app.route("/admin/home", methods=("GET", "POST"))
+@login_required
+def admin_home():
+
+    return render_template("admin/home.html")
+
+
+@app.route("/admin/search", methods=("GET", "POST"))
+@login_required
+def admin_search():
+
+    form = SearchForm()
+
+    data = mongo.db.list_collection_names()
+    print(data)
+    for d in data:
+        print(d)
+    #meta_data = mongo.db.MetaData.find_one({"Name": "Designer Info"})
+    #print(meta_data)
+    #designer_list = meta_data["Designers"]
+    #form.designer.choices = [designer for designer in designer_list]
+
+    form.client.choices = []
+    if form.validate_on_submit():
+        #data = mongo.db.Users.find_one({"username": form.login.data})
+        pass
+
+    return render_template("admin/search.html", form=form)
+
+
+"""Admin Views End"""
 
 
 if __name__ == "__main__":

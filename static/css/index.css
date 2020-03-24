@@ -11,34 +11,66 @@
         background-size: 70% 70%;
          background-position: center;
         }
-ul.mynav {
-  list-style-type: none;
-  text-align: center;
-  padding: 0;
-  margin: 0;
+nav {
+	margin: 35px 0;
 }
 
-.mynav li{
-    	display: inline-block;
-    	font-size: 20px;
-        }
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
 
-ul li a{
-    	text-decoration: none;
-        color: #fff;
-        padding: 5px 20px;
-        border: 1px solid transparent;
-        transition: 0.06s ease;
-        }
+nav ul li {
+    display: inline-block;
+}
 
-ul li a:hover{
-    	background-color: #fff;
-        color: #000;
+nav a {
+    display:block;
+	padding:10px 20px;
+	color:#FFF;
+	font-size: .8em;
+	line-height: 1em;
+	text-decoration:none;
+}
 
-ul li.active a{
-    	background-color: #fff;
-        color: #000;
-        }
+nav a:hover {
+    background-color: black;
+}
+
+nav ul ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 30%;
+}
+
+nav ul li:hover > ul {
+    display: inherit;
+}
+
+nav ul ul li {
+    width:100%;
+    height: 10%;
+    left: 35%;
+	float:none;
+	display:list-item;
+	position: relative;
+}
+
+
+nav ul ul li {
+	border: 1px solid white;
+}
+
+li > a:after {
+    content:  ' ▼';
+}
+
+li > a:only-child:after {
+     content: '';
+    }
 
 .main{
     	max-width: 1200px;
