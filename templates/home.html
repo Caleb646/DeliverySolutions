@@ -1,15 +1,12 @@
 {% extends "index.html" %}
 
 
-{% block title %}Home Page{% endblock %}
+
 {% block head %}
 {{ super() }}
-    <title>Homepage</title>
+{% block title %}Home Page{% endblock %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}">
 {% endblock %}
 
 {% block content %}
-    <header>
-
-        </header>
 {% endblock %}

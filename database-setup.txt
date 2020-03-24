@@ -2,13 +2,25 @@ Collections
 
 1. Users
 2. MetaData
+3. All Inv
+4. Each Designer with name in all CAPS
 
 MetaData
 
 {Name:"Inv Data", "shipment num": 1, "tag num": 1}
 {Name:"Designer Info", "Designers":['JOHN', 'PAUL', 'MARY', 'JONE']}
 ""For each Designer""
-{Name:"JOHN", "clients":["BOB", "JANE"]}
-{Name:"PAUL", "clients":["CAT", "JILL"]}
-{Name:"MARY", "clients":["LEVI", "CALEB"]}
-{Name:"JONE", "clients":["MADDIE", "CHARLIE"]}
+[{Name:"JOHN", "clients":["BOB", "JANE"]}
+{Name:"PAUL", "clients":["CAT", "JILL"]},
+{Name:"MARY", "clients":["LEVI", "CALEB"]},
+{Name:"JONE", "clients":["MADDIE", "CHARLIE"]}]
+
+All Inv
+
+{_id: tag_num, "shipment_num": 1, "Designer": Name, "Client": "Client Name",
+ "Volume": Int, "Date Entered": Int, "Img Num": int, "Description": int}
+
+ Each Designer
+
+ {_id: tag_num, "shipment_num": 1, "Client": "Client Name",
+ "Volume": Int, "Date Entered": Int, "Img Num": int, "Description": int}

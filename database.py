@@ -52,3 +52,35 @@ class User(UserMixin):
         return self.username
 
 
+def init_db():
+    pass
+    #Users = db["Users"]
+    #Users.insert_one({"username" : "Caleb", "password" : generate_password_hash('Anna'),
+                      #"roles" : [ "admin" ], "email" : "calebthomas646@yahoo.com" })
+#     MetaData = db["MetaData"]
+#
+#     data_list = [{'Name': "JOHN", "clients": ["BOB", "JANE"]},
+#      {'Name': "PAUL", "clients": ["CAT", "JILL"]},
+#      {'Name': "MARY", "clients": ["LEVI", "CALEB"]},
+#      {'Name': "JONE", "clients": ["MADDIE", "CHARLIE"]},
+#                  {'Name':"Inv Data", "shipment num": 1, "tag num": 1},
+# {'Name':"Designer Info", "Designers":['JOHN', 'PAUL', 'MARY', 'JONE']}]
+#
+#     admin_input = input("Type y or n if data should be reentered")
+
+    # if admin_input == "y":
+    #
+    #     for i in range(len(data_list)):
+    #         MetaData.insert_one(data_list[i])
+
+ #    all_inv = db["All Inv"]
+#  #    john = db["JOHN"]
+#  #    paul = db["PAUL"]
+#  #    jone = db["JONE"]
+#  #    mary = db["MARY"]
+#  #
+  # info = {'_id': 3, "shipment_num": 3, "Designer": "MARY", "Client": "CHARLIE",
+ #"Volume": 100, "Date Entered": Date() , "Img Num": 3, "Description":"A Table"})
+
+
+

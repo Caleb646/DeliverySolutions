@@ -15,9 +15,13 @@ class LoginForm(FlaskForm):
 
 class SearchForm(FlaskForm):
 
-    tag_num = fields.IntegerField(validators=[validators.required()])
+    tag_num = fields.IntegerField("Tag Number:", validators=[validators.optional()])
 
-    designer = fields.SelectField("Designer Name", choices=[])
+    shipment_num = fields.IntegerField("Shipment Number:", validators=[validators.optional()])
 
-    client = fields.SelectField("Client Name", choices=[])
+    designer = fields.SelectField("Designer:", choices=[], validators=[validators.optional()])
+
+    client = fields.SelectField("Client:", choices=[], validators=[validators.optional()])
+
+    submit = fields.SubmitField("Submit")
 
