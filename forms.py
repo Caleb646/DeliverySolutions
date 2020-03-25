@@ -1,5 +1,5 @@
 from werkzeug.security import check_password_hash
-from wtforms import validators, form, fields
+from wtforms import validators, form, fields, SelectMultipleField, widgets
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from run import db, app
@@ -24,4 +24,19 @@ class SearchForm(FlaskForm):
     client = fields.SelectField("Client:", choices=[], validators=[validators.optional()])
 
     submit = fields.SubmitField("Submit")
+
+
+class MultiCheckboxField(SelectMultipleField):
+
+    widget = widgets.ListWidget(prefix_label=False)
+
+    option_widgets = widgets.CheckboxInput()
+
+
+class EditForm(FlaskForm):
+
+    choices = MultiCheckboxField('Routes', coerce=int)
+
+    submit = fields.SubmitField("Set User Choices")
+
 

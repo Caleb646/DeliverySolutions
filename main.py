@@ -2,7 +2,8 @@ from flask import url_for, render_template, request, flash, redirect, jsonify, j
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User, init_db
-from forms import LoginForm, SearchForm
+from forms import LoginForm, SearchForm, EditForm
+from helpers import database_search, formatter
 from run import *
 
 #init_db()
@@ -98,10 +99,11 @@ def admin_search():
     meta_data = mongo.db.MetaData.find_one({"Name": "Designer Info"})
     designer_list = meta_data["Designers"]
     form.designer.choices = [(designer, designer) for designer in designer_list]
-    form.designer.choices.insert(-1, ('Empty', 'Empty'))
+    form.designer.choices.insert(-1, ('None', 'None'))
     client_data = mongo.db.MetaData.find_one({"Name": form.designer.choices[0][1]})
     client_list = client_data["clients"]
     form.client.choices = [(client, client) for client in client_list]
+    form.client.choices.insert(-1, ('None', 'None'))
 
     if form.validate_on_submit():
 
@@ -139,7 +141,7 @@ def chosen_designer(designer):
 
     if meta_data is None:
 
-        return jsonify({"clients": ["Empty"]})
+        return jsonify({"clients": ["None"]})
 
     else:
         client_list = meta_data["clients"]
@@ -148,24 +150,35 @@ def chosen_designer(designer):
 
             js_Array.append(client)
 
-        js_Array.insert(-1, "Empty")
+        js_Array.insert(-1, "None")
 
         return jsonify({"clients": js_Array})
 
 
-@app.route("/admin/edit")
+@app.route("/admin/edit", methods=("GET", "POST"))
 @login_required
 def admin_edit():
 
-#{"tag num": tag_num, "shipment num": shipment_num,
-# "Designer": designer, "Client": client}
+    """The format of the json data sent
+    to this function by /admin/search/ {"tag num": tag_num,
+    "shipment num": shipment_num,
+    "Designer": designer, "Client": client}.
+    """
 
     json_data = request.args["data"]
     print(json_data)
     search_data = json.loads(json_data)
+    database_data, title = database_search(search_data, db)
+    formatted_data = formatter(database_data)
+    print(database_data, title)
+    form = EditForm()
+    form.choices.choices = formatted_data
     print(f'search data {search_data}')
+    if form.validate_on_submit():
+        print(request.form.getlist("inv-data"))
+        return "It worked"
 
-    return "It Worked"
+    return render_template("admin/edit.html", form=form, title=title)
 
 
 """Admin Views End"""
