@@ -1,4 +1,4 @@
-{% extends 'index.html' %}
+{% extends 'admin/index.html' %}
 
 {% block head %} {% endblock head %}
 
@@ -26,7 +26,10 @@
                 {% endfor %}
             </fieldset>
             <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
+                <input type="submit" name="bsubmit" value="Delete">
+                {{form.movetto_field.label}}
+                {{form.movetto_field}}
+                <input type="submit" name="bsubmit" value="Move To">
             </div>
         </form>
     </div>

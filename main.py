@@ -3,12 +3,14 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User, init_db
 from forms import LoginForm, SearchForm, EditForm
-from helpers import database_search, formatter
+from helpers import database_search, formatter, user_has_role
 from run import *
 
 #init_db()
 
 login_manager.login_view = "login"
+
+
 @login_manager.user_loader
 def load_user(username):
 
@@ -27,13 +29,13 @@ def load_user(username):
 
 
 @app.route("/")
-@app.route("/home")
+@app.route("/home", endpoint="home")
 def home():
     form = LoginForm()
     return render_template("home.html", form=form)
 
 
-@app.route("/login", methods=("POST", "GET"))
+@app.route("/login", methods=("POST", "GET"), endpoint="login")
 def login():
 
     """checks to see if the user is already authenticated or not. If not
@@ -62,19 +64,20 @@ def login():
     return render_template('login.html', title='Sign In', form=form)
 
 
-@app.route('/logout')
+@app.route('/logout', endpoint="logout")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('.home'))
 
 
 """Admin Views Start"""
 
 
-@app.route("/admin", methods=("GET", "POST"))
-@app.route("/admin/home", methods=("GET", "POST"))
+@app.route("/admin", methods=("GET", "POST"), endpoint="admin_home")
+@app.route("/admin/home", methods=("GET", "POST"), endpoint="admin_home")
 @login_required
+@user_has_role(user=current_user, required_roles=("admin"))
 def admin_home():
 
     """If a user has the admin role they are directed here"""
@@ -82,8 +85,9 @@ def admin_home():
     return render_template("admin/home.html")
 
 
-@app.route("/admin/search", methods=("GET", "POST"))
+@app.route("/admin/search", methods=("GET", "POST"), endpoint="admin_search")
 @login_required
+@user_has_role(user=current_user, required_roles=("admin"))
 def admin_search():
 
     """Allows the admin to search the database using either a designer/client name or
@@ -99,11 +103,8 @@ def admin_search():
     meta_data = mongo.db.MetaData.find_one({"Name": "Designer Info"})
     designer_list = meta_data["Designers"]
     form.designer.choices = [(designer, designer) for designer in designer_list]
-    form.designer.choices.insert(-1, ('None', 'None'))
-    client_data = mongo.db.MetaData.find_one({"Name": form.designer.choices[0][1]})
-    client_list = client_data["clients"]
-    form.client.choices = [(client, client) for client in client_list]
-    form.client.choices.insert(-1, ('None', 'None'))
+    form.designer.choices.insert(0, ('None', 'None'))
+    form.client.choices.insert(0, ('None', 'None'))
 
     if form.validate_on_submit():
 
@@ -123,7 +124,9 @@ def admin_search():
     return render_template("admin/search.html", form=form)
 
 
-@app.route("/admin/search/<designer>")
+@app.route("/admin/search/<designer>", endpoint="chosen_designer")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
 def chosen_designer(designer):
 
     """This func works with the admin_search function. In search.html, when a designer
@@ -150,13 +153,14 @@ def chosen_designer(designer):
 
             js_Array.append(client)
 
-        js_Array.insert(-1, "None")
+        js_Array.insert(0, "None")
 
         return jsonify({"clients": js_Array})
 
 
-@app.route("/admin/edit", methods=("GET", "POST"))
+@app.route("/admin/edit", methods=("GET", "POST"), endpoint="admin_edit")
 @login_required
+@user_has_role(user=current_user, required_roles=("admin"))
 def admin_edit():
 
     """The format of the json data sent
@@ -168,21 +172,49 @@ def admin_edit():
     json_data = request.args["data"]
     print(json_data)
     search_data = json.loads(json_data)
-    database_data, title = database_search(search_data, db)
+
+    database_data, title= database_search(search_data, db)
     formatted_data = formatter(database_data)
     print(database_data, title)
+
     form = EditForm()
     form.choices.choices = formatted_data
+
+    meta_data = mongo.db.MetaData.find_one({"Name": "Designer Info"})
+    designer_list = meta_data["Designers"]
+    form.movetto_field.choices = [(designer, designer) for designer in designer_list]
+
     print(f'search data {search_data}')
+
     if form.validate_on_submit():
-        print(request.form.getlist("inv-data"))
-        return "It worked"
+
+        if request.form["bsubmit"] == "Move To":
+
+            designer = form.movetto_field.data
+
+            return "Moving"
+
+        if request.form["bsubmit"] == "Delete":
+
+            print(request.form.getlist("inv-data"))
+
+            return "Deleting"
 
     return render_template("admin/edit.html", form=form, title=title)
 
 
 """Admin Views End"""
 
+"""User Views Start"""
+
+
+@app.route("/user/home")
+def user_home():
+    return render_template("index.html")
+
+
+
+"""User Views End"""
 
 if __name__ == "__main__":
     app.run()
