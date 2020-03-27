@@ -2,6 +2,7 @@ from flask import redirect
 from functools import wraps
 from re import sub
 
+
 def database_search(data: dict, db):
     """The format of the json data sent
         to this function by /admin/search/ {"tag num": tag_num,
@@ -12,13 +13,13 @@ def database_search(data: dict, db):
     db_data = None
     title = None
 
-
-    print(f'designer, client, shipment num, tag num: {data["Designer"],data["Client"],data["shipment num"],data["tag num"] }')
+    print(
+        f'designer, client, shipment num, tag num: {data["Designer"], data["Client"], data["shipment num"], data["tag num"]}')
     if data["Designer"] is not "" and data["Designer"] != "None":
 
         if data["Client"] is not "" and data["Client"] != "None":
             print("There was a client finding all of the designers inv")
-            db_data = list(db["AllInv"].find({"Client": data["Client"]}))
+            db_data = list(db["AllInv"].find({"Designer": data["Designer"], "Client": data["Client"]}))
             title = data["Designer"] + " " + data["Client"]
 
         else:
@@ -52,7 +53,6 @@ def database_search(data: dict, db):
 
 
 def formatter(db_data):
-
     """db_data format: {'_id': 5.0, 'shipment_num': 4.0,
     'Designer': 'JONE', 'Client': 'JILL',
            'Volume': 100.0,
@@ -78,7 +78,6 @@ def formatter(db_data):
         if type(db_data) is list:
 
             for row in db_data:
-
                 data_list.append((row["_id"],
                                   (row['shipment num'],
                                    row['Designer'],
@@ -113,7 +112,6 @@ def formatter(db_data):
 
 
 def user_has_role(user, required_roles):
-
     """A decorator for views that not only need to check if the user is authenticated
     but also if the user has the required role to see the view. It takes flask's
     current_user as an argument and then a tuple of required_roles. If the user
@@ -130,8 +128,7 @@ def user_has_role(user, required_roles):
             for role in user.roles:
 
                 if role not in required_roles:
-
-                    return redirect("/"+role+"/home")
+                    return redirect("/" + role + "/home")
 
             return func(*args, **kwargs)
 
@@ -140,21 +137,29 @@ def user_has_role(user, required_roles):
     return decorator
 
 
-def strip_text(text: list):
-
+def strip_text(text: list, turnto_int=False):
     """Takes a list of tag numbers that along with additional chrs.
     These additional chrs are strip, the tag number is converted to an 
     integer and appended to a list which is then returned."""
 
     tagnum_list = []
 
-    for chr in text:
+    if turnto_int:
 
-        stripped_text = int(sub("[() {} , ]", "", chr))
+        for chr in text:
+            stripped_text = int(sub("[() {}, ]", "", chr))
 
-        print(stripped_text)
+            print(stripped_text)
 
-        tagnum_list.append(stripped_text)
+            tagnum_list.append(stripped_text)
+    else:
+
+        for chr in text:
+            stripped_text = sub("[() {}, ]", "", chr)
+
+            print(stripped_text)
+
+            tagnum_list.append(stripped_text)
 
     return tagnum_list
 
@@ -170,7 +175,48 @@ def moveby_tagnum(designer, client, tagnum_list, db):
 
     for num in tagnum_list:
 
-        db["AllInv"].update_one({"_id": num},\
-         { "$set": { "Designer": designer, "Client": client}})
+        db["AllInv"].update_one({"_id": num}, \
+                                {"$set": {"Designer": designer, "Client": client}})
 
+
+def remove_single_row(data_list: list, key, db):
+
+    """Takes a list of values that along with the key will find the correct document in
+    the db and delete it."""
+
+    for data in data_list:
+
+        db["Users"].remove({key: data})
+
+
+def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, db, db_table="Users", valueto_find=None, array=False):
+
+    """Takes a list of values that will be used along with the keytofind to find
+    the correct document in the db. Then use the keytoupdate and valuetoupdate it
+    will update that singular field. Right now can only be used with one valuetoupdate.
+    This function will also update an array in the database using .$[] if array
+    is set to True. Can also set the db_table name. It defaults to Users."""
+
+    if array:
+
+        if valueto_find is not None:
+
+            for data in data_list:
+
+                db[db_table].update_one({keytofind: data[valueto_find]}, \
+                                        {"$set": {keytoupdate + ".$[]": valuetoupdate}})
+
+        else:
+
+            for data in data_list:
+
+                db[db_table].update_one({keytofind: data}, \
+                        {"$set": {keytoupdate+".$[]": valuetoupdate}})
+
+    else:
+
+        for data in data_list:
+
+            db[db_table].update_one({keytofind: data}, \
+                                   {"$set": {keytoupdate: valuetoupdate}})
 

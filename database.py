@@ -61,19 +61,20 @@ def init_db():
 
         Users = db["Users"]
 
-        Users.insert_one({"username" : "Caleb", "password" : generate_password_hash('Anna'),
+        Users.insert_one({"_id": 1, "username" : "Caleb", "password" : generate_password_hash('Anna'),
                           "roles" : [ "admin" ], "email" : "calebthomas646@yahoo.com" })
-        Users.insert_one({"username": "Joe", "password": generate_password_hash('Anna'),
+        Users.insert_one({"_id": 2, "username": "Joe", "password": generate_password_hash('Anna'),
                           "roles": ["user"], "email": "calebthomas646@yahoo.com"})
-        Users.insert_one({"username": "Jill", "password": generate_password_hash('Anna'),
+        Users.insert_one({"_id": 3, "username": "Jill", "password": generate_password_hash('Anna'),
                           "roles": ["super_employee"], "email": "calebthomas646@yahoo.com"})
-        Users.insert_one({"username": "Jane", "password": generate_password_hash('Anna'),
+        Users.insert_one({"_id": 4, "username": "Jane", "password": generate_password_hash('Anna'),
                           "roles": ["employee"], "email": "calebthomas646@yahoo.com"})
 
         metadata = db["MetaData"]
 
         meta_list = [{'Name': "Inv Data", "shipment num": 1, "tag num": 1},
-                    {'Name': "Designer Info", "Designers": ['JOHN', 'PAUL', 'MARY', 'JONE']}]
+                    {'Name': "Designer Info", "Designers": ['JOHN', 'PAUL', 'MARY', 'JONE']},
+                     {"Name": "User Ids", "id": 4, "Editable Fields":["email", "username"]}]
 
         metadata.insert_many(meta_list)
 

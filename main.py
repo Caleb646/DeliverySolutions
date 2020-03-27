@@ -2,8 +2,10 @@ from flask import url_for, render_template, request, flash, redirect, jsonify, j
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User, init_db
-from forms import LoginForm, SearchForm, EditForm, UserEditForm
-from helpers import database_search, formatter, user_has_role, strip_text, deleteby_tagnum, moveby_tagnum
+from forms import LoginForm, SearchForm, EditForm, UserEditForm, UserPasswordForm
+
+from helpers import database_search, formatter, user_has_role,\
+    strip_text, deleteby_tagnum, moveby_tagnum, remove_single_row, update_single_field
 from run import *
 
 #init_db()
@@ -198,11 +200,11 @@ def admin_edit():
 
             data = request.form.getlist("inv-data")
 
-            tagnum_list = strip_text(data)
+            tagnum_list = strip_text(data, turnto_int=True)
 
             moveby_tagnum(designer, client, tagnum_list, db)
 
-            return redirect(url_for(".admin_search", message="Move Successful"))
+            return redirect(url_for(".admin_search"))
 
         if request.form["bsubmit"] == "Delete":
 
@@ -210,11 +212,11 @@ def admin_edit():
 
             data = request.form.getlist("inv-data")
 
-            tagnum_list = strip_text(data)
+            tagnum_list = strip_text(data, turnto_int=True)
 
             deleteby_tagnum(tagnum_list, db)
 
-            return redirect(url_for(".admin_search", message="Deletion Successful"))
+            return redirect(url_for(".admin_search"))
 
     return render_template("admin/edit.html", form=form, title=title)
 
@@ -246,7 +248,100 @@ def admin_manage_users():
 
     form = UserEditForm()
 
-    return render_template("admin/manage_users.html")
+    user_list = list(db["Users"].find({}))
+
+    meta_list = db["MetaData"].find_one({"Name": "User Ids"})
+
+    editable_list = meta_list["Editable Fields"]
+    print(editable_list)
+
+    form.choices.choices = [(row['_id'], (row["username"],
+                                           row["email"],
+                                           row["roles"])) for row in user_list]
+
+    form.editable_fields.choices = [(field, field) for field in editable_list]
+
+    form.choices.errors = "Select Only One User."
+
+    if form.validate_on_submit():
+
+        data = request.form.getlist("user-data")
+
+        if len(data) == 1:
+
+            userid_list = strip_text(data, turnto_int=True)
+
+            if request.form["bsubmit"] == "Remove User":
+
+                remove_single_row(userid_list, "username", db)
+
+                return redirect(url_for(".admin_manage_users"))
+
+            if request.form["bsubmit"] == "Change User Info":
+                print(userid_list)
+                user_data = db["Users"].find_one({"_id": userid_list[0]})
+
+                username = user_data["username"]
+
+                fieldto_edit = form.editable_fields.data
+
+                newfield_val = form.change_to.data
+
+                if fieldto_edit == "username":
+
+                    list_rows = list(db["AllInv"].find({"username": username}))
+
+                    update_single_field(list_rows, "username", "Designer",
+                                        newfield_val, db, db_table="AllInv", array=False, valueto_find="username")
+
+                    update_single_field(userid_list, "_id", fieldto_edit,
+                                        newfield_val, db, array=False)
+
+                else:
+
+                    update_single_field(userid_list, "_id", fieldto_edit,
+                                        newfield_val, db, array=False)
+
+                return redirect(url_for(".admin_manage_users"))
+
+            if request.form["bsubmit"] == "Change Role To":
+
+                new_role = form.roles.data
+
+                update_single_field(userid_list, "_id", "roles", new_role, db, array=True)
+
+                return redirect(url_for(".admin_manage_users"))
+
+            if request.form["bsubmit"] == "Change Password":
+
+                if len(userid_list) > 0:
+
+                    return redirect(url_for(".admin_user_password", userid=userid_list[0]))
+
+                else:
+
+                    form.choices.errors = "Must Select a User before you can change their password!!"
+
+                    return render_template("admin/manage_users.html", form=form)
+        else:
+
+            form.choices.errors = "Select Only One User!!!"
+
+            return render_template("admin/manage_users.html", form=form)
+
+    return render_template("admin/manage_users.html", form=form)
+
+
+@app.route("/admin/change-password/<userid>", methods=("GET", "POST"), endpoint="admin_user_password")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_user_password(userid):
+
+    print(f"user id: {userid}")
+
+    form = UserPasswordForm()
+
+    return render_template("admin/change-user-password.html", form=form)
 
 
 """Admin Views End"""

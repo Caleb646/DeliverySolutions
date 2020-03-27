@@ -46,8 +46,19 @@ class UserEditForm(FlaskForm):
 
     choices = MultiCheckboxField('Routes', coerce=int)
 
-    roles = fields.SelectField("Roles:", choices=["admin", "user", "super_employee", "employee"], validators=[validators.optional()])
-    
-    #client = fields.SelectField("Pick Client too:", choices=[], validators=[validators.optional()])
+    roles = fields.SelectField("Roles:", choices=[("admin", "admin"),
+                                                  ("user", "user"),
+                                                  ("super_employee", "super_employee"),
+                                                  ("employee", "employee")], validators=[validators.optional()])
+
+    editable_fields = fields.SelectField("Choose One Field to Change", validators=[validators.optional()])
+
+    change_to = fields.StringField("Change Field To", validators=[validators.optional()])
+
+class UserPasswordForm(FlaskForm):
+
+    admin_password = fields.PasswordField("Current Admin Password", validators=[validators.required()])
+
+    new_user_password = fields.PasswordField("New User Password", validators=[validators.required()])
 
 
