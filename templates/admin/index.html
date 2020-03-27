@@ -12,7 +12,9 @@
 
   </head>
 <header>
+  
     <nav>
+      
         <ul class="mynav">
               <li class="active"><a href="/admin/home"> Home</a></li>
               <li><a href="#"> Edit Inv</a>
@@ -23,17 +25,21 @@
               </li>
             <li><a href="#"> User Access</a>
                 <ul>
-                    <li><a href="#">Users</a></li>
-                    <li><a href="#">Super Employees</a></li>
-                    <li><a href="#">Employees</a></li>
-                </ul>
+                  {%block nav%}
+                    <li><a href="/admin/manage-users">Manage Users</a></li>
+                    {%endblock%}
+                    <li><a href="/logout"> Logout</a></li>
+                  
+                  </ul>
             </li>
-            <li><a href="/logout"> Logout</a></li>
+            
         </ul>
+        
+         
           <div class="title">
             	<h1>Inventory Solutions</h1>
           </div>
-    </nav>
+        </nav>
   </header>
 
 <body>

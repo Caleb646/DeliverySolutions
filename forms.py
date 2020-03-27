@@ -38,9 +38,16 @@ class EditForm(FlaskForm):
     choices = MultiCheckboxField('Routes', coerce=int)
 
     movetto_field = fields.SelectField("Move to Designers Inv:", choices=[], validators=[validators.optional()])
+    
+    client = fields.SelectField("Pick Client too:", choices=[], validators=[validators.optional()])
 
-    #delete = fields.SubmitField("Delete", _name="bsubmit", default="delete")
 
-    #move_to = fields.SubmitField("Move to", _name="bsubmit", default="move to")
+class UserEditForm(FlaskForm):
+
+    choices = MultiCheckboxField('Routes', coerce=int)
+
+    roles = fields.SelectField("Roles:", choices=["admin", "user", "super_employee", "employee"], validators=[validators.optional()])
+    
+    #client = fields.SelectField("Pick Client too:", choices=[], validators=[validators.optional()])
 
 

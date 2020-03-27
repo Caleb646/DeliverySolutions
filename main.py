@@ -2,8 +2,8 @@ from flask import url_for, render_template, request, flash, redirect, jsonify, j
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User, init_db
-from forms import LoginForm, SearchForm, EditForm
-from helpers import database_search, formatter, user_has_role
+from forms import LoginForm, SearchForm, EditForm, UserEditForm
+from helpers import database_search, formatter, user_has_role, strip_text, deleteby_tagnum, moveby_tagnum
 from run import *
 
 #init_db()
@@ -183,8 +183,10 @@ def admin_edit():
     meta_data = mongo.db.MetaData.find_one({"Name": "Designer Info"})
     designer_list = meta_data["Designers"]
     form.movetto_field.choices = [(designer, designer) for designer in designer_list]
-
-    print(f'search data {search_data}')
+    
+    client_data = mongo.db.MetaData.find_one({"Name": designer_list[0]})
+    client_list = client_data["clients"]
+    form.client.choices = [(client, client) for client in client_list]
 
     if form.validate_on_submit():
 
@@ -192,15 +194,59 @@ def admin_edit():
 
             designer = form.movetto_field.data
 
-            return "Moving"
+            client = form.client.data
+
+            data = request.form.getlist("inv-data")
+
+            tagnum_list = strip_text(data)
+
+            moveby_tagnum(designer, client, tagnum_list, db)
+
+            return redirect(url_for(".admin_search", message="Move Successful"))
 
         if request.form["bsubmit"] == "Delete":
 
             print(request.form.getlist("inv-data"))
 
-            return "Deleting"
+            data = request.form.getlist("inv-data")
+
+            tagnum_list = strip_text(data)
+
+            deleteby_tagnum(tagnum_list, db)
+
+            return redirect(url_for(".admin_search", message="Deletion Successful"))
 
     return render_template("admin/edit.html", form=form, title=title)
+
+
+@app.route("/admin/edit/<designer>", methods=("GET", "POST"), endpoint="fill_client_field")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def fill_client_field(designer):
+
+    js_Array = []
+    print(js_Array)
+
+    print(f"Designer: {designer}")
+    meta_data = mongo.db.MetaData.find_one({"Name": designer})
+
+    client_list = meta_data["clients"]
+
+    for client in client_list:
+
+        js_Array.append(client)
+
+    return jsonify({"clients": js_Array})
+
+
+@app.route("/admin/manage-users", methods=("GET", "POST"), endpoint="admin_manage_users")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_manage_users():
+
+    form = UserEditForm()
+
+    return render_template("admin/manage_users.html")
 
 
 """Admin Views End"""

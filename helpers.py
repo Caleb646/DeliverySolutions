@@ -1,5 +1,6 @@
 from flask import redirect
 from functools import wraps
+from re import sub
 
 def database_search(data: dict, db):
     """The format of the json data sent
@@ -137,4 +138,39 @@ def user_has_role(user, required_roles):
         return the_last_func
 
     return decorator
+
+
+def strip_text(text: list):
+
+    """Takes a list of tag numbers that along with additional chrs.
+    These additional chrs are strip, the tag number is converted to an 
+    integer and appended to a list which is then returned."""
+
+    tagnum_list = []
+
+    for chr in text:
+
+        stripped_text = int(sub("[() {} , ]", "", chr))
+
+        print(stripped_text)
+
+        tagnum_list.append(stripped_text)
+
+    return tagnum_list
+
+
+def deleteby_tagnum(tag_nums: list, db):
+
+    for num in tag_nums:
+
+        db["AllInv"].remove({"_id": num})
+
+
+def moveby_tagnum(designer, client, tagnum_list, db):
+
+    for num in tagnum_list:
+
+        db["AllInv"].update_one({"_id": num},\
+         { "$set": { "Designer": designer, "Client": client}})
+
 

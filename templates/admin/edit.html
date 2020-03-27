@@ -29,9 +29,34 @@
                 <input type="submit" name="bsubmit" value="Delete">
                 {{form.movetto_field.label}}
                 {{form.movetto_field}}
+                {{form.client.label}}
+                {{form.client}}
                 <input type="submit" name="bsubmit" value="Move To">
             </div>
         </form>
     </div>
+
+    <script>
+        let designer_select = document.getElementById("movetto_field");
+        let client_select = document.getElementById("client");
+        designer_select.onchange = function() {
+            designer = designer_select.value;
+
+            fetch("/admin/edit/" + designer).then(function(response) {
+               response.json().then(function(data) {
+
+                    let optionHTML = "";
+
+                    for(let client of data.clients) {
+                        optionHTML += "<option value=''" + client + ">" + client + "</option>";
+
+                    }
+
+                    client_select.innerHTML = optionHTML;
+
+                   });
+            });
+        }
+    </script>
 
 {% endblock %}

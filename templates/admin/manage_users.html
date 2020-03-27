@@ -1,0 +1,49 @@
+{% extends "admin/index.html" %}
+
+
+{% block title %}User Managment{% endblock %}
+{% block head %}
+{{ super() }}
+    <title>Homepage</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin/home.css') }}">
+{% endblock %}
+
+{% block nav %}
+{{super()}}
+<li><a href="#">Create Users</a></li>
+{% endblock %}
+
+{% block content %}
+    <header>
+        <div class="content-section">
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">{{title}}</legend>
+                    {% if form.choices.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.choices.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% for choice in form.choices.choices %}
+                        <div class="form-check">
+                            <input type="checkbox" id="vehicle1" name="inv-data" value={{choice[1]}}>
+                            {{choice[1]}}
+    
+                        </div>
+                    {% endfor %}
+                </fieldset>
+                <div class="form-group">
+                    <input type="submit" name="bsubmit" value="Delete">
+                    {{form.movetto_field.label}}
+                    {{form.movetto_field}}
+                    {{form.client.label}}
+                    {{form.client}}
+                    <input type="submit" name="bsubmit" value="Move To">
+                </div>
+            </form>
+        </div>
+        </header>
+{% endblock %}
