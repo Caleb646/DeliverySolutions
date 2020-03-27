@@ -1,5 +1,6 @@
 from flask import redirect
 from functools import wraps
+from werkzeug.security import check_password_hash, generate_password_hash
 from re import sub
 
 
@@ -189,7 +190,7 @@ def remove_single_row(data_list: list, key, db):
         db["Users"].remove({key: data})
 
 
-def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, db, db_table="Users", valueto_find=None, array=False):
+def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, db, db_table="Users", array=False):
 
     """Takes a list of values that will be used along with the keytofind to find
     the correct document in the db. Then use the keytoupdate and valuetoupdate it
@@ -199,19 +200,10 @@ def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, 
 
     if array:
 
-        if valueto_find is not None:
+        for data in data_list:
 
-            for data in data_list:
-
-                db[db_table].update_one({keytofind: data[valueto_find]}, \
-                                        {"$set": {keytoupdate + ".$[]": valuetoupdate}})
-
-        else:
-
-            for data in data_list:
-
-                db[db_table].update_one({keytofind: data}, \
-                        {"$set": {keytoupdate+".$[]": valuetoupdate}})
+            db[db_table].update_one({keytofind: data}, \
+                    {"$set": {keytoupdate+".$[]": valuetoupdate}})
 
     else:
 
@@ -219,4 +211,20 @@ def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, 
 
             db[db_table].update_one({keytofind: data}, \
                                    {"$set": {keytoupdate: valuetoupdate}})
+
+
+def validate_password(pass_to_validate, current_user, db):
+
+    current_user_data = db["Users"].find_one({"username": current_user.username})
+
+    current_pass = current_user_data["password"]
+
+    if check_password_hash(current_pass, pass_to_validate):
+
+        return True
+
+
+def change_password(user_id, new_password, db):
+
+    db["Users"].update_one({"_id": user_id}, {"$set": {"password": generate_password_hash(new_password)}})
 

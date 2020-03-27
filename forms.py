@@ -55,10 +55,11 @@ class UserEditForm(FlaskForm):
 
     change_to = fields.StringField("Change Field To", validators=[validators.optional()])
 
+
 class UserPasswordForm(FlaskForm):
 
     admin_password = fields.PasswordField("Current Admin Password", validators=[validators.required()])
 
-    new_user_password = fields.PasswordField("New User Password", validators=[validators.required()])
+    new_user_password = fields.StringField("New User Password", validators=[validators.required()])
 
 

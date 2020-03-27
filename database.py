@@ -74,7 +74,7 @@ def init_db():
 
         meta_list = [{'Name': "Inv Data", "shipment num": 1, "tag num": 1},
                     {'Name': "Designer Info", "Designers": ['JOHN', 'PAUL', 'MARY', 'JONE']},
-                     {"Name": "User Ids", "id": 4, "Editable Fields":["email", "username"]}]
+                     {"Name": "User Ids", "id": 4, "Editable Fields":["email",]}]
 
         metadata.insert_many(meta_list)
 

@@ -3,9 +3,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User, init_db
 from forms import LoginForm, SearchForm, EditForm, UserEditForm, UserPasswordForm
-
 from helpers import database_search, formatter, user_has_role,\
-    strip_text, deleteby_tagnum, moveby_tagnum, remove_single_row, update_single_field
+    strip_text, deleteby_tagnum, moveby_tagnum, remove_single_row, update_single_field,\
+    validate_password, change_password
 from run import *
 
 #init_db()
@@ -278,29 +278,13 @@ def admin_manage_users():
                 return redirect(url_for(".admin_manage_users"))
 
             if request.form["bsubmit"] == "Change User Info":
-                print(userid_list)
-                user_data = db["Users"].find_one({"_id": userid_list[0]})
-
-                username = user_data["username"]
 
                 fieldto_edit = form.editable_fields.data
 
                 newfield_val = form.change_to.data
 
-                if fieldto_edit == "username":
-
-                    list_rows = list(db["AllInv"].find({"username": username}))
-
-                    update_single_field(list_rows, "username", "Designer",
-                                        newfield_val, db, db_table="AllInv", array=False, valueto_find="username")
-
-                    update_single_field(userid_list, "_id", fieldto_edit,
-                                        newfield_val, db, array=False)
-
-                else:
-
-                    update_single_field(userid_list, "_id", fieldto_edit,
-                                        newfield_val, db, array=False)
+                update_single_field(userid_list, "_id", fieldto_edit,
+                                    newfield_val, db, array=False)
 
                 return redirect(url_for(".admin_manage_users"))
 
@@ -337,11 +321,34 @@ def admin_manage_users():
 @user_has_role(user=current_user, required_roles=("admin"))
 def admin_user_password(userid):
 
-    print(f"user id: {userid}")
-
     form = UserPasswordForm()
 
+    if form.validate_on_submit():
+
+        admin_password = form.admin_password.data
+
+        new_user_password = form.new_user_password.data
+
+        if validate_password(admin_password, current_user, db):
+
+            change_password(userid, new_user_password, db)
+
+            return redirect(url_for(".admin_manage_users"))
+
+        else:
+
+            form.admin_password.errors = "Current Admin Password was incorrect!!!"
+
+            return render_template("admin/change-user-password.html", form=form)
+
     return render_template("admin/change-user-password.html", form=form)
+
+
+@app.route("/admin/create-user", methods=("GET", "POST"), endpoint="admin_create_user")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_create_user():
+    pass
 
 
 """Admin Views End"""
