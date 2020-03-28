@@ -6,15 +6,22 @@ Collections
 
 Users
 
-{ "_id" : ObjectId("5e7d37d99da828c9ff8f2bb7"), "username" : "Jane",
+{ "_id" : 1, "username" : "Jane",
  "password" : "password",
  "roles" : [ "employee" ], "email" : "calebthomas646@yahoo.com" }
+
+ if user in Users has a role of user this will be there profile setup
+
+ { "_id" : 1, "username" : "Jane",
+ "password" : "password",
+ "roles" : [ "user" ], "email" : "calebthomas646@yahoo.com", "clients":["BOB", "JANE"]}
 
 MetaData
 
 {Name:"Inv Data", "shipment num": 1, "tag num": 1}
 {Name:"Designer Info", "Designers":['JOHN', 'PAUL', 'MARY', 'JONE']}
 {"Name": "User Ids", "id": 1, "Editable Fields":["email", "username"]}
+{"Name": "Prices", "Storage Price": .10}
 ""For each Designer""
 [{Name:"JOHN", "clients":["BOB", "JANE"]}
 {Name:"PAUL", "clients":["CAT", "JILL"]},

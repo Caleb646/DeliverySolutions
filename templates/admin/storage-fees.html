@@ -1,0 +1,45 @@
+{% extends 'admin/index.html' %}
+
+{% block head %} {% endblock head %}
+
+{% block content %}
+
+{{ super() }}
+
+
+ <form method="POST" action="">
+
+     {{ form.hidden_tag() if form.hidden_tag }}
+     {{ form.designers.label}}
+     {{ form.designers}}
+     {{ form.clients.label }}
+     {{ form.clients }}
+     {{ form.submit }}
+
+</form>
+
+        {{ link | safe }}
+        <script>
+            let designer_select = document.getElementById("designers");
+            let client_select = document.getElementById("clients");
+            designer_select.onchange = function() {
+                designer = designer_select.value;
+
+                fetch("/admin/edit/" + designer).then(function(response) {
+                   response.json().then(function(data) {
+
+                        let optionHTML = "";
+
+                        for(let client of data.clients) {
+                            optionHTML += "<option value=''" + client + ">" + client + "</option>";
+
+                        }
+
+                        client_select.innerHTML = optionHTML;
+
+                       });
+                });
+            }
+        </script>
+
+{% endblock %}

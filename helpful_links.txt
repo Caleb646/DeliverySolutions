@@ -1,13 +1,5 @@
 https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-v-user-logins
 
 
-https://flask-login.readthedocs.io/en/latest/#login-example
-
-Using login_manager.user_loader()
-https://stackoverflow.com/questions/54992412/flask-login-usermixin-class-with-a-mongodb
-
-
-https://www.roytuts.com/python-flask-rest-api-mongodb-crud-example/
-
-Getting/Creating Checkbox Data in Flask with .getlist
-https://www.youtube.com/watch?v=_sgVt16Q4O4
+Using Paypal's API
+https://www.youtube.com/watch?v=HIwRzATH6iU

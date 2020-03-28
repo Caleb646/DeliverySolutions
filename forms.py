@@ -1,5 +1,6 @@
 from werkzeug.security import check_password_hash
 from wtforms import validators, form, fields, SelectMultipleField, widgets
+from wtforms.fields.html5 import EmailField
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from run import db, app
@@ -51,9 +52,11 @@ class UserEditForm(FlaskForm):
                                                   ("super_employee", "super_employee"),
                                                   ("employee", "employee")], validators=[validators.optional()])
 
-    editable_fields = fields.SelectField("Choose One Field to Change", validators=[validators.optional()])
+    editable_fields = fields.SelectField("Choose One Field to Change:", validators=[validators.optional()])
 
-    change_to = fields.StringField("Change Field To", validators=[validators.optional()])
+    change_to = fields.StringField("Change Chosen Field To", validators=[validators.optional()])
+
+    add_client = fields.StringField("Change Field To", validators=[validators.optional()])
 
 
 class UserPasswordForm(FlaskForm):
@@ -61,5 +64,41 @@ class UserPasswordForm(FlaskForm):
     admin_password = fields.PasswordField("Current Admin Password", validators=[validators.required()])
 
     new_user_password = fields.StringField("New User Password", validators=[validators.required()])
+
+
+class CreateWorker(FlaskForm):
+
+    username = fields.StringField("Enter Username", validators=[validators.required()])
+
+    password = fields.PasswordField("Enter Password", validators=[validators.required()])
+
+    email = EmailField("Enter Email", validators=[validators.required()])
+
+    roles = fields.SelectField("Enter User Role:", choices=[("admin", "admin"),
+                                                  ("super_employee", "super_employee"),
+                                                  ("employee", "employee")], validators=[validators.required()])
+    submit = fields.SubmitField()
+
+
+class CreateUser(FlaskForm):
+
+    username = fields.StringField("Enter Username", validators=[validators.required()])
+
+    password = fields.PasswordField("Enter Password", validators=[validators.required()])
+
+    email = EmailField("Enter Email", validators=[validators.required()])
+
+    known_clients = fields.StringField("Enter Known Clients", validators=[validators.optional()])
+
+    submit = fields.SubmitField()
+
+
+class StorageFees(FlaskForm):
+
+    designers = fields.SelectField("Designer:")
+
+    clients = fields.SelectField("Clients:", validators=[validators.optional()])
+
+    submit = fields.SubmitField()
 
 

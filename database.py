@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import uuid
-from datetime import datetime
+from datetime import date
 from run import db
 
 class User(UserMixin):
@@ -61,7 +61,7 @@ def init_db():
 
         Users = db["Users"]
 
-        Users.insert_one({"_id": 1, "username" : "Caleb", "password" : generate_password_hash('Anna'),
+        Users.insert_one({"_id": 1, "username": "Caleb", "password" : generate_password_hash('Anna'),
                           "roles" : [ "admin" ], "email" : "calebthomas646@yahoo.com" })
         Users.insert_one({"_id": 2, "username": "Joe", "password": generate_password_hash('Anna'),
                           "roles": ["user"], "email": "calebthomas646@yahoo.com"})
@@ -70,36 +70,41 @@ def init_db():
         Users.insert_one({"_id": 4, "username": "Jane", "password": generate_password_hash('Anna'),
                           "roles": ["employee"], "email": "calebthomas646@yahoo.com"})
 
+        Users.insert_one({"_id": 5, "username": "John", "password": generate_password_hash('Anna'),
+                          "roles": ["user"], "email": "calebthomas646@yahoo.com",
+                          "clients": ["BOB", "JANE"]})
+        Users.insert_one({"_id": 6, "username": "Paul", "password": generate_password_hash('Anna'),
+                          "roles": ["user"], "email": "calebthomas646@yahoo.com",
+                          "clients": ["CAT", "JILL"]})
+        Users.insert_one({"_id": 7, "username": "Mary", "password": generate_password_hash('Anna'),
+                          "roles": ["user"], "email": "calebthomas646@yahoo.com",
+                          "clients": ["LEVI", "CALEB"]})
+        Users.insert_one({"_id": 8, "username": "Jone", "password": generate_password_hash('Anna'),
+                          "roles": ["user"], "email": "calebthomas646@yahoo.com",
+                          "clients": ["MADDIE", "CHARLIE"]})
+
         metadata = db["MetaData"]
 
         meta_list = [{'Name': "Inv Data", "shipment num": 1, "tag num": 1},
-                    {'Name': "Designer Info", "Designers": ['JOHN', 'PAUL', 'MARY', 'JONE']},
-                     {"Name": "User Ids", "id": 4, "Editable Fields":["email",]}]
+                    {'Name': "Designer Info", "Designers": ['John', 'Paul', 'Mary', 'Jone']},
+                     {"Name": "User Ids", "id": 9, "Editable Fields":["email",]},
+                     {"Name": "Prices", "Storage Price": .10}]
 
         metadata.insert_many(meta_list)
 
-
-
-        data_list = [{'Name': "JOHN", "clients": ["BOB", "JANE"]},
-                     {'Name': "PAUL", "clients": ["CAT", "JILL"]},
-                     {'Name': "MARY", "clients": ["LEVI", "CALEB"]},
-                     {'Name': "JONE", "clients": ["MADDIE", "CHARLIE"]}]
-
-        metadata.insert_many(data_list)
-
         all_inv = db["AllInv"]
 
-        inv_data = [{"_id": 1, "shipment num": 1, 'Designer': "JOHN",\
-                    "Client": "BOB", "Volume":100, "Date Entered": datetime.now(),\
+        inv_data = [{"_id": 1, "shipment num": 1, 'Designer': "John",\
+                    "Client": "BOB", "Volume":100, "Date Entered": date(2019, 5, 20),\
                      "Img Num": 1, "Description": "A Table", "Location": "A4", "Storage Fees": "None"},
-                    {"_id": 2, "shipment num": 2, 'Designer': "PAUL", \
-                     "Client": "JILL", "Volume": 100, "Date Entered": datetime.now(), \
+                    {"_id": 2, "shipment num": 2, 'Designer': "Paul", \
+                     "Client": "JILL", "Volume": 100, "Date Entered": date(2019, 5, 10), \
                      "Img Num": 2, "Description": "A Table", "Location": "B4", "Storage Fees": "None"},
-                    {"_id": 3, "shipment num": 3, 'Designer': "MARY", \
-                     "Client": "CALEB", "Volume": 100, "Date Entered": datetime.now(), \
+                    {"_id": 3, "shipment num": 3, 'Designer': "Mary", \
+                     "Client": "CALEB", "Volume": 100, "Date Entered": date(2019, 2, 5), \
                      "Img Num": 3, "Description": "A Table", "Location": "C4", "Storage Fees": "None"},
-                    {"_id": 4, "shipment num": 4, 'Designer': "JONE", \
-                     "Client": "CHARLIE", "Volume": 100, "Date Entered": datetime.now(), \
+                    {"_id": 4, "shipment num": 4, 'Designer': "Jone", \
+                     "Client": "CHARLIE", "Volume": 100, "Date Entered": date(2019, 3, 20), \
                      "Img Num": 4, "Description": "A Table", "Location": "D4", "Storage Fees": "None"}]
 
         all_inv.insert_many(inv_data)

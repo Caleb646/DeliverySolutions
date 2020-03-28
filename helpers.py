@@ -190,20 +190,31 @@ def remove_single_row(data_list: list, key, db):
         db["Users"].remove({key: data})
 
 
-def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, db, db_table="Users", array=False):
+def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, db, db_table="Users",\
+                        array=False, save_array=False):
 
     """Takes a list of values that will be used along with the keytofind to find
     the correct document in the db. Then use the keytoupdate and valuetoupdate it
     will update that singular field. Right now can only be used with one valuetoupdate.
     This function will also update an array in the database using .$[] if array
-    is set to True. Can also set the db_table name. It defaults to Users."""
+    is set to True. Can also set the db_table name. It defaults to Users. The %push operator adds an element
+    to an array without deleting the contents. $set deletes the contents."""
 
     if array:
 
-        for data in data_list:
+        if save_array:
 
-            db[db_table].update_one({keytofind: data}, \
-                    {"$set": {keytoupdate+".$[]": valuetoupdate}})
+            for data in data_list:
+
+                db[db_table].update_one({keytofind: data}, \
+                        {"$push": {keytoupdate: valuetoupdate}})
+
+        else:
+
+            for data in data_list:
+
+                db[db_table].update_one({keytofind: data}, \
+                        {"$set": {keytoupdate+".$[]": valuetoupdate}})
 
     else:
 
@@ -226,5 +237,75 @@ def validate_password(pass_to_validate, current_user, db):
 
 def change_password(user_id, new_password, db):
 
-    db["Users"].update_one({"_id": user_id}, {"$set": {"password": generate_password_hash(new_password)}})
+    db["Users"].update_one({"_id": user_id},
+                           {"$set": {"password": generate_password_hash(new_password)}})
+
+
+def validate_username(username, db):
+
+    db_response = db["Users"].find_one({"username": username})
+
+    if db_response is None:
+
+        return True
+
+
+def create_worker(username, password, email, role, db):
+
+    hash_pass = generate_password_hash(password)
+
+    meta_data = db["MetaData"].find_one({"Name": "User Ids"})
+
+    current_id = meta_data['id']
+
+    db["Users"].insert_one({"_id": current_id, "username": username, "password": hash_pass,
+                           "email": email, "roles": [role]})
+
+    current_id += 1
+
+    update_single_field(["User Ids"], "Name", "id", current_id, db, array=False, db_table="MetaData")
+
+
+def create_user(username, password, email, known_clients, db):
+
+    hash_pass = generate_password_hash(password)
+
+    meta_data = db["MetaData"].find_one({"Name": "User Ids"})
+
+    current_id = meta_data['id']
+
+    db["Users"].insert_one({"_id": current_id, "username": username, "password": hash_pass,
+                            "email": email, "roles": ["user"], "clients": known_clients})
+
+    db["MetaData"].update_one({"Name": "Designer Info"}, \
+                                {"$push": {"Designers": username}})
+
+    current_id += 1
+
+    update_single_field(["User Ids"], "Name", "id", current_id, db, array=False, db_table="MetaData")
+
+
+def validate_client(userid_list, clientto_add, db):
+
+    designer_data = db["Users"].find_one({"_id": userid_list[0]})
+
+    client_list = designer_data["clients"]
+
+    print(f"client list {client_list}")
+
+    if "user" not in designer_data["roles"] or clientto_add in client_list:
+
+        return False
+
+    else:
+
+        return True
+
+def calculate_storage_fees(data_list, db):
+
+    pass
+
+
+
+
 

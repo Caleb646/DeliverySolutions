@@ -1,0 +1,65 @@
+{% extends "admin/index.html" %}
+
+
+{% block title %}User Management{% endblock %}
+{% block head %}
+    <!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin/home.css') }}">-->
+{% endblock %}
+
+{% block nav %}
+{{super()}}
+<li><a href="/admin/create-worker">Create Workers</a></li>
+<li><a href="/admin/create-user">Create Users</a></li>
+{% endblock %}
+
+{% block content %}
+        <div class="content-section">
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <b>{{message}}</b>
+                    <legend class="border-bottom mb-4">{{title}}</legend>
+                    {% if form.username.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.username.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if form.password.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.password.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if form.email.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.email.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if form.known_clients.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.known_clients.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                </fieldset>
+                <div class="form-group">
+                    {{form.username.label}}
+                    {{form.username}}<br><br>
+                    {{form.password.label}}
+                    {{form.password}}<br><br>
+                    {{form.email.label}}
+                    {{form.email}}<br><br>
+                    {{form.known_clients.label}}
+                    {{form.known_clients}}<br><br>
+                    {{form.submit}}
+                </div>
+            </form>
+        </div>
+{% endblock %}

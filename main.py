@@ -2,10 +2,11 @@ from flask import url_for, render_template, request, flash, redirect, jsonify, j
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User, init_db
-from forms import LoginForm, SearchForm, EditForm, UserEditForm, UserPasswordForm
+from forms import LoginForm, SearchForm, EditForm, UserEditForm, UserPasswordForm, CreateWorker,\
+    CreateUser, StorageFees
 from helpers import database_search, formatter, user_has_role,\
     strip_text, deleteby_tagnum, moveby_tagnum, remove_single_row, update_single_field,\
-    validate_password, change_password
+    validate_password, change_password, validate_username, create_worker, create_user, validate_client
 from run import *
 
 #init_db()
@@ -102,7 +103,7 @@ def admin_search():
 
     form = SearchForm()
 
-    meta_data = mongo.db.MetaData.find_one({"Name": "Designer Info"})
+    meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
     designer_list = meta_data["Designers"]
     form.designer.choices = [(designer, designer) for designer in designer_list]
     form.designer.choices.insert(0, ('None', 'None'))
@@ -131,18 +132,16 @@ def admin_search():
 @user_has_role(user=current_user, required_roles=("admin"))
 def chosen_designer(designer):
 
-    """This func works with the admin_search function. In search.html, when a designer
-    from the designer dropdown list is selected. The designer's name is sent to this function
-    by means of the url <designer>. The database is then queried with that name and the
-    results of that query are then jsonified where they are picked up a JavaScript script
-    in search.html. The results are then used to populate the client dropdown list."""
+    """This func works with the admin_search function and the javascript n search.html.
+    In search.html, when a designerfrom the designer dropdown list is selected
+    the javascript in search.html picks up thedesigner and fetches this url /admin/search + designer.
+    With the designer name this func is able to query the database and grab the clients associated with
+    it. This func then jsons the db response and returns it so the js can grab it unjson it
+    and add the client names to the selectfield."""
 
-    print(designer)
     js_Array = []
-    print(js_Array)
 
-    print(f"Designer is not equal to none: {designer}")
-    meta_data = mongo.db.MetaData.find_one({"Name": designer})
+    meta_data = db["Users"].find_one({"username": designer})
 
     if meta_data is None:
 
@@ -182,11 +181,11 @@ def admin_edit():
     form = EditForm()
     form.choices.choices = formatted_data
 
-    meta_data = mongo.db.MetaData.find_one({"Name": "Designer Info"})
+    meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
     designer_list = meta_data["Designers"]
     form.movetto_field.choices = [(designer, designer) for designer in designer_list]
     
-    client_data = mongo.db.MetaData.find_one({"Name": designer_list[0]})
+    client_data = db["Users"].find_one({"username": designer_list[0]})
     client_list = client_data["clients"]
     form.client.choices = [(client, client) for client in client_list]
 
@@ -230,7 +229,7 @@ def fill_client_field(designer):
     print(js_Array)
 
     print(f"Designer: {designer}")
-    meta_data = mongo.db.MetaData.find_one({"Name": designer})
+    meta_data = db["Users"].find_one({"username": designer})
 
     client_list = meta_data["clients"]
 
@@ -246,6 +245,9 @@ def fill_client_field(designer):
 @user_has_role(user=current_user, required_roles=("admin"))
 def admin_manage_users():
 
+    """This page diplays all the current users and allows for multiple operations to be done on their
+    info. """
+
     form = UserEditForm()
 
     user_list = list(db["Users"].find({}))
@@ -253,7 +255,6 @@ def admin_manage_users():
     meta_list = db["MetaData"].find_one({"Name": "User Ids"})
 
     editable_list = meta_list["Editable Fields"]
-    print(editable_list)
 
     form.choices.choices = [(row['_id'], (row["username"],
                                            row["email"],
@@ -261,7 +262,9 @@ def admin_manage_users():
 
     form.editable_fields.choices = [(field, field) for field in editable_list]
 
-    form.choices.errors = "Select Only One User."
+    first_message = "Select Only One User."
+
+    title = "All Current Users"
 
     if form.validate_on_submit():
 
@@ -275,7 +278,9 @@ def admin_manage_users():
 
                 remove_single_row(userid_list, "username", db)
 
-                return redirect(url_for(".admin_manage_users"))
+                message = "User was Removed"
+
+                return render_template("admin/manage_users.html", form=form, message=message, title=title)
 
             if request.form["bsubmit"] == "Change User Info":
 
@@ -286,7 +291,9 @@ def admin_manage_users():
                 update_single_field(userid_list, "_id", fieldto_edit,
                                     newfield_val, db, array=False)
 
-                return redirect(url_for(".admin_manage_users"))
+                message = "User Info was Changed Successfully"
+
+                return render_template("admin/manage_users.html", form=form, message=message, title=title)
 
             if request.form["bsubmit"] == "Change Role To":
 
@@ -294,7 +301,9 @@ def admin_manage_users():
 
                 update_single_field(userid_list, "_id", "roles", new_role, db, array=True)
 
-                return redirect(url_for(".admin_manage_users"))
+                message = "Role Change was Successful"
+
+                return render_template("admin/manage_users.html", form=form, message=message, title=title)
 
             if request.form["bsubmit"] == "Change Password":
 
@@ -304,16 +313,35 @@ def admin_manage_users():
 
                 else:
 
-                    form.choices.errors = "Must Select a User before you can change their password!!"
+                    message = "Must Select a User before you can change their password!!"
 
-                    return render_template("admin/manage_users.html", form=form)
+                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
+
+            if request.form["bsubmit"] == "Add Client":
+
+                new_client = form.add_client.data.upper()
+
+                if validate_client(userid_list, new_client, db):
+
+                    update_single_field(userid_list, "_id", "clients", new_client, db,
+                                        array=True, save_array=True)
+
+                    message = "Client was Added Successfully"
+
+                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
+
+                else:
+
+                    message = "Client Already Exists or Selected User does not have the role of user."
+
+                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
         else:
 
             form.choices.errors = "Select Only One User!!!"
 
             return render_template("admin/manage_users.html", form=form)
 
-    return render_template("admin/manage_users.html", form=form)
+    return render_template("admin/manage_users.html", form=form, message=first_message, title=title)
 
 
 @app.route("/admin/change-password/<userid>", methods=("GET", "POST"), endpoint="admin_user_password")
@@ -344,12 +372,132 @@ def admin_user_password(userid):
     return render_template("admin/change-user-password.html", form=form)
 
 
+@app.route("/admin/create-worker", methods=("GET", "POST"), endpoint="admin_create_worker")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_create_worker():
+
+    form = CreateWorker()
+
+    if form.validate_on_submit():
+
+        username = form.username.data
+
+        if validate_username(username, db):
+
+            password = form.password.data
+
+            email = form.email.data
+
+            role = form.roles.data
+
+            create_worker(username, password, email, role, db)
+
+            message = "Worker Created Successfully."
+
+            return render_template("admin/create-worker.html", form=form, message=message)
+
+        else:
+
+            message = "Username Already Exists."
+
+            return render_template("admin/create-worker.html", form=form, message=message)
+
+    return render_template("admin/create-worker.html", form=form)
+
+
 @app.route("/admin/create-user", methods=("GET", "POST"), endpoint="admin_create_user")
 @login_required
 @user_has_role(user=current_user, required_roles=("admin"))
 def admin_create_user():
-    pass
 
+    form = CreateUser()
+
+    title = "Create a New User"
+
+    message = "If there are multiple known clients, separate each one with a comma."
+
+    if form.validate_on_submit():
+
+        username = form.username.data
+
+        if validate_username(username, db):
+
+            password = form.password.data
+
+            email = form.email.data
+
+            clients = form.known_clients.data
+
+            client_list = clients.strip().upper().split(",")
+
+            print(client_list)
+
+            create_user(username, password, email, client_list, db)
+
+            message = "User was Successfully Created."
+
+            return render_template("/admin/create-user.html", form=form, message=message, title=title)
+
+        else:
+
+            message = "Username Already Exists."
+
+            return render_template("/admin/create-user.html", form=form, message=message, title=title)
+
+    return render_template("/admin/create-user.html", form=form, title=title, message=message)
+
+
+@app.route("/admin/storage-fees", methods=("GET", "POST"), endpoint="admin_storage_fees")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_storage_fees():
+
+    meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
+
+    print(meta_data)
+
+    designer_list = meta_data["Designers"]
+    print(designer_list)
+    form = StorageFees()
+
+    form.designers.choices = [(designer, designer) for designer in designer_list]
+
+    if form.validate_on_submit():
+
+        designer = form.designers.data
+
+        client = form.clients.data
+
+        data = json.dumps({"Designer": designer, "Client": client})
+
+        return redirect(url_for(".admin_show_fees", data=data))
+
+    return render_template("admin/storage-fees.html", form=form)
+
+
+@app.route("/admin/show-fees", methods=("GET", "POST"), endpoint="admin_show_fees")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_show_fees():
+
+    json_data = request.args["data"]
+
+    print(json_data)
+
+    search_data = json.loads(json_data)
+
+    print(f'search data {search_data}')
+
+    db_data, title = database_search(search_data, db)
+
+    title = "Current Storage Fees for " + title
+
+    show_data = [(row["Designer"], row["Client"], row['Date Entered'],
+                  row["Storage Fees"])
+                  for row in db_data]
+
+    return render_template("admin/show-fees.html", data=show_data, title=title)
 
 """Admin Views End"""
 
