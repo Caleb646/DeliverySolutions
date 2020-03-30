@@ -13,13 +13,13 @@
 {% block content %}
         <div class="content-section">
             <form method="POST" action="">
-                {{ form.hidden_tag() }}
                 <fieldset class="form-group">
                     <b>{{message}}</b>
                     <legend class="border-bottom mb-4">{{title}}</legend>
                 {% for choice in data %}
                     <div class="form-check">
-                        <input type="checkbox" id="vehicle1" name="inv-data" value={{choice}}>
+                        <input type="checkbox" id="vehicle1" name="inv-data" value={{choice[0]}}>
+                        {{choice}}
                     </div>
                 {% endfor %}
 

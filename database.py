@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import uuid
-from datetime import date
+from datetime import datetime
 from run import db
 
 class User(UserMixin):
@@ -15,7 +15,7 @@ class User(UserMixin):
         self.email = email
         self.password = password
         self.roles = roles
-        #self._id = uuid.uuid4().hex if _id is None else _id
+        self._id = _id
 
 
     @staticmethod
@@ -95,17 +95,21 @@ def init_db():
         all_inv = db["AllInv"]
 
         inv_data = [{"_id": 1, "shipment num": 1, 'Designer': "John",\
-                    "Client": "BOB", "Volume":100, "Date Entered": date(2019, 5, 20),\
-                     "Img Num": 1, "Description": "A Table", "Location": "A4", "Storage Fees": "None"},
+                    "Client": "BOB", "Volume":100, "Date Entered": datetime(2019, 5, 20),\
+                     "Img Num": 1, "Description": "A Table", "Location": "A4",
+                     "Storage Fees": "None", "Paid Last": "None"},
                     {"_id": 2, "shipment num": 2, 'Designer': "Paul", \
-                     "Client": "JILL", "Volume": 100, "Date Entered": date(2019, 5, 10), \
-                     "Img Num": 2, "Description": "A Table", "Location": "B4", "Storage Fees": "None"},
+                     "Client": "JILL", "Volume": 100, "Date Entered": datetime(2019, 5, 10), \
+                     "Img Num": 2, "Description": "A Table", "Location": "B4",
+                     "Storage Fees": "None", "Paid Last": "None"},
                     {"_id": 3, "shipment num": 3, 'Designer': "Mary", \
-                     "Client": "CALEB", "Volume": 100, "Date Entered": date(2019, 2, 5), \
-                     "Img Num": 3, "Description": "A Table", "Location": "C4", "Storage Fees": "None"},
+                     "Client": "CALEB", "Volume": 100, "Date Entered": datetime(2019, 2, 5), \
+                     "Img Num": 3, "Description": "A Table", "Location": "C4",
+                     "Storage Fees": "None", "Paid Last": datetime(2019, 8, 10)},
                     {"_id": 4, "shipment num": 4, 'Designer': "Jone", \
-                     "Client": "CHARLIE", "Volume": 100, "Date Entered": date(2019, 3, 20), \
-                     "Img Num": 4, "Description": "A Table", "Location": "D4", "Storage Fees": "None"}]
+                     "Client": "CHARLIE", "Volume": 100, "Date Entered": datetime(2019, 3, 20), \
+                     "Img Num": 4, "Description": "A Table", "Location": "D4",
+                     "Storage Fees": "None", "Paid Last": datetime.today()}]
 
         all_inv.insert_many(inv_data)
 

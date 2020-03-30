@@ -1,0 +1,30 @@
+{% extends 'user/index.html' %}
+
+{% block head %} {% endblock %}
+
+{% block content %}
+
+{{ super() }}
+
+<div class="instructions">
+    <b>The results of your query.</b>
+</div><br>
+
+<fieldset class="form-group">
+                    <b>{{message}}</b><br>
+                    <legend class="border-bottom mb-4">{{title}}</legend>
+                <b>|Tag number| |Shipment number| |Client| |Description| |Storage Fees| |Date Entered| |Date Last Paid|</b>
+                {% for choice in data %}
+                    <div class="form-check">
+                        <p>|{{choice['_id']}}|  |{{choice['shipment num']}}|  |{{choice['Client']}}| |{{choice['Description']}}|
+                            |{{choice['Storage Fees']}}|  |{{choice['Date Entered'].date()}}|  |{{choice['Paid Last'].date()}}|</p>
+                    </div>
+                {% endfor %}
+
+    </fieldset>
+
+
+
+        {{ link | safe }}
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'user/index.html' %}
+
+{% block head %} {% endblock %}
+
+{% block content %}
+
+{{ super() }}
+
+<div class="instructions">
+    <b>Pick a specific client of yours to see the current inventory for them.</b>
+</div><br>
+
+
+ <form method="POST" action="">
+
+     {{ form.hidden_tag() if form.hidden_tag }}
+     {{ form.client.label }}
+     {{ form.client }}
+
+
+       <!-- <button class="btn" type="submit">Submit</button>-->
+{{ form.submit() }}
+</form>
+
+        {{ link | safe }}
+
+{% endblock %}

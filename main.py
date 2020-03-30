@@ -3,13 +3,16 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User, init_db
 from forms import LoginForm, SearchForm, EditForm, UserEditForm, UserPasswordForm, CreateWorker,\
-    CreateUser, StorageFees
+    CreateUser, StorageFees, UserSearch
 from helpers import database_search, formatter, user_has_role,\
     strip_text, deleteby_tagnum, moveby_tagnum, remove_single_row, update_single_field,\
-    validate_password, change_password, validate_username, create_worker, create_user, validate_client
+    validate_password, change_password, validate_username, create_worker, create_user,\
+    validate_client, calculate_storage_fees
 from run import *
 
 #init_db()
+
+#calculate_storage_fees(db)
 
 login_manager.login_view = "login"
 
@@ -23,12 +26,12 @@ def load_user(username):
     exists in the db it will then return a User obj to Flask so that Flask_Login can monitor
     this user throughout."""
 
-    user = mongo.db.Users.find_one({"username": username})
+    user = db["Users"].find_one({"username": username})
     print(f"user id and user: {username, user}")
     if not user:
         return None
     return User(username=user['username'], password=user["password"],
-                email=["email"], roles=user["roles"])
+                email=["email"], roles=user["roles"], _id=user["_id"])
 
 
 @app.route("/")
@@ -463,6 +466,14 @@ def admin_storage_fees():
 
     form.designers.choices = [(designer, designer) for designer in designer_list]
 
+    client_data = db["Users"].find_one({"username": designer_list[0]})
+
+    client_list = client_data['clients']
+
+    client_list.insert(0, "None")
+
+    form.clients.choices = [(client, client) for client in client_list]
+
     if form.validate_on_submit():
 
         designer = form.designers.data
@@ -483,8 +494,6 @@ def admin_show_fees():
 
     json_data = request.args["data"]
 
-    print(json_data)
-
     search_data = json.loads(json_data)
 
     print(f'search data {search_data}')
@@ -493,9 +502,13 @@ def admin_show_fees():
 
     title = "Current Storage Fees for " + title
 
-    show_data = [(row["Designer"], row["Client"], row['Date Entered'],
+    print(db_data)
+
+    show_data = [(row["_id"], row["Designer"], row["Client"], row['Date Entered'],
                   row["Storage Fees"])
                   for row in db_data]
+
+    print(show_data)
 
     return render_template("admin/show-fees.html", data=show_data, title=title)
 
@@ -504,9 +517,53 @@ def admin_show_fees():
 """User Views Start"""
 
 
-@app.route("/user/home")
+@app.route("/user/home", methods=("GET", "POST"), endpoint="user_home")
+@login_required
+@user_has_role(user=current_user, required_roles=("user"))
 def user_home():
-    return render_template("index.html")
+    return render_template("user/home.html")
+
+
+@app.route("/user/search", methods=("GET", "POST"), endpoint="user_search")
+@login_required
+@user_has_role(user=current_user, required_roles=("user"))
+def user_search():
+
+    currentuser_data = db["Users"].find_one({"_id": current_user._id})
+
+    client_list = currentuser_data["clients"]
+
+    form = UserSearch()
+
+    form.client.choices = [(client, client) for client in client_list]
+
+    if form.validate_on_submit():
+
+        tag_num = form.tag_num.data
+        shipment_num = form.shipment_num.data
+        client = form.client.data
+
+        data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": current_user.username, "Client": client}
+
+        json_dict = json.dumps(data_dict)
+
+        return redirect(url_for(".user_view", data=json_dict))
+
+    return render_template("user/search.html", form=form)
+
+
+@app.route("/user/view", methods=("GET", "POST"), endpoint="user_view")
+@login_required
+@user_has_role(user=current_user, required_roles=("user"))
+def user_view():
+
+    json_data = request.args["data"]
+
+    search_data = json.loads(json_data)
+
+    database_data, title = database_search(search_data, db)
+
+    return render_template("user/view.html", title=title, data=database_data)
 
 
 

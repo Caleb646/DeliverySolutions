@@ -1,6 +1,7 @@
 from flask import redirect
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime
 from re import sub
 
 
@@ -14,19 +15,17 @@ def database_search(data: dict, db):
     db_data = None
     title = None
 
-    print(
-        f'designer, client, shipment num, tag num: {data["Designer"], data["Client"], data["shipment num"], data["tag num"]}')
+    print(data)
+
     if data["Designer"] is not "" and data["Designer"] != "None":
 
         if data["Client"] is not "" and data["Client"] != "None":
-            print("There was a client finding all of the designers inv")
             db_data = list(db["AllInv"].find({"Designer": data["Designer"], "Client": data["Client"]}))
-            title = data["Designer"] + " " + data["Client"]
+            title = data["Designer"] + "'s Current Inventory for" + " " + data["Client"]
 
         else:
-            print("There was no client finding all of the designers inv")
             db_data = list(db["AllInv"].find({"Designer": data["Designer"]}))
-            title = "Designer:" + " " + data["Designer"]
+            title = data["Designer"] + "'s Current Inventory"
 
     elif data["shipment num"] is not None and data["shipment num"] != "None":
         db_data = db["AllInv"].find_one({"shipment num": data["shipment num"]})
@@ -37,7 +36,6 @@ def database_search(data: dict, db):
             title = "Shipment Number:" + " " + str(data["shipment num"]) + " does not exist. Retry search!"
 
     elif data["tag num"] is not None and data["tag num"] != "None":
-        print(data["tag num"])
         db_data = db["AllInv"].find_one({"_id": data["tag num"]})
 
         if db_data is not None:
@@ -301,9 +299,58 @@ def validate_client(userid_list, clientto_add, db):
 
         return True
 
-def calculate_storage_fees(data_list, db):
 
-    pass
+def calculate_storage_fees(db, allinv_tblname="AllInv", price_tblname="MetaData"):
+
+    all_inv = db[allinv_tblname].find({})
+
+    price_list = db[price_tblname].find_one({"Name": "Prices"})
+
+    price = price_list["Storage Price"]
+
+    tdys_date = datetime.today()
+
+    user_input = input("Type y to continue: ")
+
+    if user_input == "y":
+
+        for row in all_inv:
+
+            print(row)
+
+            volume = row["Volume"]
+
+            per_day_price = volume * price
+
+            if row["Paid Last"] == "None":
+
+                date_received = row["Date Entered"]
+
+                time_delta = tdys_date - date_received
+
+                print(f"time delta in if {time_delta}")
+                print(f"days in if {time_delta.days}")
+
+                storage_fees = time_delta.days * per_day_price
+
+                print(f'storage fees {storage_fees}')
+
+                db[allinv_tblname].update_one({"_id": row["_id"]},
+                                       {"$set": {"Storage Fees": storage_fees, "Paid Last": tdys_date}})
+
+            else:
+
+                date_paid_to = row["Paid Last"]
+
+                time_delta = tdys_date - date_paid_to
+
+                print(f"time delta in else {time_delta}")
+                print(f"days in else {time_delta.days}")
+
+                storage_fees = time_delta.days * per_day_price
+
+                db[allinv_tblname].update_one({"_id": row["_id"]},
+                                              {"$set": {"Storage Fees": storage_fees, "Paid Last": tdys_date}})
 
 
 

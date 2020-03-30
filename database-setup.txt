@@ -31,8 +31,10 @@ MetaData
 
 AllInv
 
-{_id: tag_num, "shipment_num": 1, "Designer": Name, "Client": "Client Name",
- "Volume": Int, "Date Entered": Int, "Img Num": int, "Description": int}
+{"_id": 2, "shipment num": 2, 'Designer': "Paul", \
+"Client": "JILL", "Volume": 100, "Date Entered": date(2019, 5, 10), \
+"Img Num": 2, "Description": "A Table", "Location": "B4",
+"Storage Fees": "None", "Paid Last": "None"}
 
 
  Each Designer !!!For right now these collections have been done away with!!!

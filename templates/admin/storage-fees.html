@@ -25,7 +25,7 @@
             designer_select.onchange = function() {
                 designer = designer_select.value;
 
-                fetch("/admin/edit/" + designer).then(function(response) {
+                fetch("/admin/search/" + designer).then(function(response) {
                    response.json().then(function(data) {
 
                         let optionHTML = "";
