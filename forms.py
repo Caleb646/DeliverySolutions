@@ -27,6 +27,23 @@ class SearchForm(FlaskForm):
     submit = fields.SubmitField("Submit")
 
 
+class AddForm(FlaskForm):
+
+    designer = fields.SelectField("Designer:", choices=[], validators=[validators.optional()])
+
+    client = fields.SelectField("Client:", choices=[], validators=[validators.optional()])
+
+    volume = fields.IntegerField("Volume:", validators=[validators.optional()])
+
+    description = fields.StringField("Description:", validators=[validators.optional()])
+
+    location = fields.StringField("Location:", validators=[validators.optional()])
+
+    image_num = fields.IntegerField("Image number:", validators=[validators.optional()])
+
+    submit = fields.SubmitField("Submit")
+
+
 class MultiCheckboxField(SelectMultipleField):
 
     widget = widgets.ListWidget(prefix_label=False)

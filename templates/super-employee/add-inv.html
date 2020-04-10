@@ -1,0 +1,110 @@
+{% extends 'super-employee/index.html' %}
+
+{% block head %} {% endblock %}
+
+{% block content %}
+
+{{ super() }}
+
+
+ <form method="POST" action="" id="add-inv">
+     {{ form.hidden_tag() if form.hidden_tag }}
+
+     {{ form.designer.label}}
+     {{ form.designer}}
+     {{ form.client.label }}
+     {{ form.client }}<br><br>
+
+     <table id="data_table">
+
+        <tr>
+            <th></th>
+            <th>Volume</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>Image Number</th>
+        </tr>
+
+        <!-- <tr>
+             <td>{{ form.volume}}</td>
+             <td>{{ form.description}}</td>
+             <td>{{ form.location}}</td>
+             <td>{{ form.image_num}}</td>
+         </tr>-->
+
+     </table>
+
+
+<br><br><button id="add-btn">Add Row</button><br><br>
+{{ form.submit() }}
+</form>
+
+        {{ link | safe }}
+        <script>
+            let table = document.getElementById("data_table");
+            let designer_select = document.getElementById("designer");
+            let client_select = document.getElementById("client");
+            let row_id = 1;
+            let btn_key = 10;
+
+            designer_select.onchange = function() {
+                designer = designer_select.value;
+
+                fetch("/admin/search/" + designer).then(function(response) {
+                   response.json().then(function(data) {
+
+                        let optionHTML = "";
+
+                        for(let client of data.clients) {
+                            optionHTML += "<option value=''" + client + ">" + client + "</option>";
+
+                        }
+
+                        client_select.innerHTML = optionHTML;
+
+                       });
+                });
+            }
+            function add_row(){
+
+                let row = document.createElement("tr");
+                row.setAttribute('id', row_id);
+                let btn_id = row_id + btn_key;
+
+                var fields = new Array(
+                    "<td><button id="+btn_id+" onclick=remove_row(this.id)>Remove row</button></td>",
+                    "<td><input type='text' name='volume'></td>",
+                    "<td><input type='text' name='volume'></td>",
+                    "<td><input type='text' name='volume'></td>",
+                    "<td><input type='text' name='volume'></td>",
+                    )
+
+
+                row_id = row_id + 1;
+                row.innerHTML = fields.join("");
+                table.appendChild(row);
+
+                document.getElementById(btn_id).addEventListener("click", function(event){
+                    event.preventDefault();
+                    remove_row(btn_id);
+
+                    });
+
+
+            }
+
+            document.getElementById("add-btn").addEventListener("click", function(event){
+
+            event.preventDefault();
+            add_row();
+
+            });
+
+            function remove_row(b_id){
+                therow_id = b_id - btn_key;
+                alert(therow_id);
+            }
+
+        </script>
+
+{% endblock %}

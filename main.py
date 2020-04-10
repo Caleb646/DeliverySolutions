@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from database import User, init_db
 from forms import LoginForm, SearchForm, EditForm, UserEditForm, UserPasswordForm, CreateWorker,\
-    CreateUser, StorageFees, UserSearch
+    CreateUser, StorageFees, UserSearch, AddForm
 from helpers import database_search, formatter, user_has_role,\
     strip_text, deleteby_tagnum, moveby_tagnum, remove_single_row, update_single_field,\
     validate_password, change_password, validate_username, create_worker, create_user,\
@@ -132,7 +132,7 @@ def admin_search():
 
 @app.route("/admin/search/<designer>", endpoint="chosen_designer")
 @login_required
-@user_has_role(user=current_user, required_roles=("admin"))
+@user_has_role(user=current_user, required_roles=("admin", "super_employee"))
 def chosen_designer(designer):
 
     """This func works with the admin_search function and the javascript n search.html.
@@ -566,8 +566,145 @@ def user_view():
     return render_template("user/view.html", title=title, data=database_data)
 
 
+@app.route("/user/storage-fees", methods=("GET", "POST"), endpoint="user_storage_fees")
+@login_required
+@user_has_role(user=current_user, required_roles=("user"))
+def user_storage_fees():
+
+    data_dict = {"Designer": current_user.username,
+                 "Client": "None",
+                 "tag num": "None",
+                 "shipment num": "None"}
+
+    database_data, title = database_search(data_dict, db)
+
+    return render_template("user/view.html", title=title, data=database_data)
+
 
 """User Views End"""
+
+"""Super Employee Views Start"""
+
+
+@app.route("/super_employee/home", methods=("GET",), endpoint="super_employee_home")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_home():
+
+    return render_template("super-employee/home.html")
+
+
+@app.route("/super_employee/search", methods=("GET", "POST"), endpoint="super_employee_search")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_search():
+
+    """Allows the admin to search the database using either a designer/client name or
+    tag/shipment number. This function renders the search.html which has two dropdown
+    lists. The first, the designer list will be populated with names from the
+    database upon the page being rendered. The client list will be populated once a
+    designer is selected. This func works in tandem with chosen_designer. Once the form has
+    been validated the results will be jsoned and the user will be redirected to the
+    admin_edit func."""
+
+    form = SearchForm()
+
+    meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
+    designer_list = meta_data["Designers"]
+    form.designer.choices = [(designer, designer) for designer in designer_list]
+    form.designer.choices.insert(0, ('None', 'None'))
+    form.client.choices.insert(0, ('None', 'None'))
+
+    if form.validate_on_submit():
+
+        tag_num = form.tag_num.data
+        shipment_num = form.shipment_num.data
+        designer = form.designer.data
+        client = form.client.data
+
+        print(f'tag num, shipment num, designer, client {tag_num, shipment_num, designer, client}')
+
+        data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": designer, "Client": client}
+
+        json_dict = json.dumps(data_dict)
+
+        return redirect(url_for(".super_employee_edit", data=json_dict))
+
+    return render_template("super-employee/search.html", form=form)
+
+
+@app.route("/super_employee/edit", methods=("GET", "POST"), endpoint="super_employee_edit")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_edit():
+    """The format of the json data sent
+    to this function by /admin/search/ {"tag num": tag_num,
+    "shipment num": shipment_num,
+    "Designer": designer, "Client": client}.
+    """
+
+    json_data = request.args["data"]
+    print(json_data)
+    search_data = json.loads(json_data)
+
+    database_data, title = database_search(search_data, db)
+    formatted_data = formatter(database_data)
+    print(database_data, title)
+
+    form = EditForm()
+    form.choices.choices = formatted_data
+
+    meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
+    designer_list = meta_data["Designers"]
+    form.movetto_field.choices = [(designer, designer) for designer in designer_list]
+
+    client_data = db["Users"].find_one({"username": designer_list[0]})
+    client_list = client_data["clients"]
+    form.client.choices = [(client, client) for client in client_list]
+
+    if form.validate_on_submit():
+
+        if request.form["bsubmit"] == "Move To":
+            designer = form.movetto_field.data
+
+            client = form.client.data
+
+            data = request.form.getlist("inv-data")
+
+            tagnum_list = strip_text(data, turnto_int=True)
+
+            moveby_tagnum(designer, client, tagnum_list, db)
+
+            return redirect(url_for(".super_employee_search"))
+
+        if request.form["bsubmit"] == "Delete":
+            print(request.form.getlist("inv-data"))
+
+            data = request.form.getlist("inv-data")
+
+            tagnum_list = strip_text(data, turnto_int=True)
+
+            deleteby_tagnum(tagnum_list, db)
+
+            return redirect(url_for(".super_employee_search"))
+
+    return render_template("super-employee/edit.html", form=form, title=title)
+
+@app.route("/super_employee/add-inv", methods=("GET", "POST"), endpoint="super_employee_add_inv")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_add_inv():
+
+    form = AddForm()
+
+    return render_template("super-employee/add-inv.html", form=form)
+
+
+"""Super Employee Views End"""
+
+
+
+
 
 if __name__ == "__main__":
     app.run()

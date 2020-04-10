@@ -342,12 +342,14 @@ def calculate_storage_fees(db, allinv_tblname="AllInv", price_tblname="MetaData"
 
                 date_paid_to = row["Paid Last"]
 
+                left_over_fees = row["Storage Fees"]
+
                 time_delta = tdys_date - date_paid_to
 
                 print(f"time delta in else {time_delta}")
                 print(f"days in else {time_delta.days}")
 
-                storage_fees = time_delta.days * per_day_price
+                storage_fees = (time_delta.days * per_day_price) + left_over_fees
 
                 db[allinv_tblname].update_one({"_id": row["_id"]},
                                               {"$set": {"Storage Fees": storage_fees, "Paid Last": tdys_date}})

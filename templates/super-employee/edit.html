@@ -1,0 +1,62 @@
+{% extends 'super-employee/index.html' %}
+
+{% block head %} {% endblock head %}
+
+{{ super() }}
+{% block content %}
+
+<div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">{{title}}</legend>
+                {% if form.choices.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.choices.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% for choice in form.choices.choices %}
+                    <div class="form-check">
+                        <input type="checkbox" id="vehicle1" name="inv-data" value={{choice[1]}}>
+                        {{choice[1]}}
+
+                    </div>
+                {% endfor %}
+            </fieldset>
+            <div class="form-group">
+                <input type="submit" name="bsubmit" value="Delete">
+                {{form.movetto_field.label}}
+                {{form.movetto_field}}
+                {{form.client.label}}
+                {{form.client}}
+                <input type="submit" name="bsubmit" value="Move To">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let designer_select = document.getElementById("movetto_field");
+        let client_select = document.getElementById("client");
+        designer_select.onchange = function() {
+            designer = designer_select.value;
+
+            fetch("/admin/edit/" + designer).then(function(response) {
+               response.json().then(function(data) {
+
+                    let optionHTML = "";
+
+                    for(let client of data.clients) {
+                        optionHTML += "<option value=''" + client + ">" + client + "</option>";
+
+                    }
+
+                    client_select.innerHTML = optionHTML;
+
+                   });
+            });
+        }
+    </script>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'super-employee/index.html' %}
+
+{% block head %} {% endblock %}
+
+{% block content %}
+
+{{ super() }}
+
+
+ <form method="POST" action="">
+
+     {{ form.hidden_tag() if form.hidden_tag }}
+     {{ form.tag_num.label}}
+     {{ form.tag_num}}
+     {{ form.shipment_num.label}}
+     {{ form.shipment_num}}
+     {{ form.designer.label}}
+     {{ form.designer}}
+     {{ form.client.label }}
+     {{ form.client }}
+
+
+       <!-- <button class="btn" type="submit">Submit</button>-->
+{{ form.submit() }}
+</form>
+
+        {{ link | safe }}
+        <script>
+            let designer_select = document.getElementById("designer");
+            let client_select = document.getElementById("client");
+            designer_select.onchange = function() {
+                designer = designer_select.value;
+
+                fetch("/admin/search/" + designer).then(function(response) {
+                   response.json().then(function(data) {
+
+                        let optionHTML = "";
+
+                        for(let client of data.clients) {
+                            optionHTML += "<option value=''" + client + ">" + client + "</option>";
+
+                        }
+
+                        client_select.innerHTML = optionHTML;
+
+                       });
+                });
+            }
+        </script>
+
+{% endblock %}
