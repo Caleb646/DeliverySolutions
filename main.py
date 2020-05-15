@@ -703,8 +703,5 @@ def super_employee_add_inv():
 """Super Employee Views End"""
 
 
-
-
-
 if __name__ == "__main__":
     app.run()

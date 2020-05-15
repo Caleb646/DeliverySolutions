@@ -146,7 +146,7 @@ def strip_text(text: list, turnto_int=False):
     if turnto_int:
 
         for chr in text:
-            stripped_text = int(sub("[() {}, ]", "", chr))
+            stripped_text = int(sub("[() {}, <> ]", "", chr))
 
             print(stripped_text)
 
@@ -154,7 +154,7 @@ def strip_text(text: list, turnto_int=False):
     else:
 
         for chr in text:
-            stripped_text = sub("[() {}, ]", "", chr)
+            stripped_text = sub("[() {}, <> ]", "", chr)
 
             print(stripped_text)
 
