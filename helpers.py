@@ -148,19 +148,16 @@ def strip_text(text: list, turnto_int=False, toStr=False):
     if turnto_int:
 
         for chr in text:
+            
             stripped_text = int(sub("[() {}, <> ]", "", chr))
-
-            print(stripped_text)
 
             tagnum_list.append(stripped_text)
 
     if toStr:
 
         for chr in text:
-            
-            stripped_text = sub("[() {}, <> ]", "", chr)
 
-            print(stripped_text)
+            stripped_text = sub("[() {}, <> ]", "", chr)
 
             wordInput += stripped_text
 
@@ -170,9 +167,8 @@ def strip_text(text: list, turnto_int=False, toStr=False):
     else:
 
         for chr in text:
-            stripped_text = sub("[() {}, <> ]", "", chr)
 
-            print(stripped_text)
+            stripped_text = sub("[() {}, <> ]", "", chr)
 
             tagnum_list.append(stripped_text)
 

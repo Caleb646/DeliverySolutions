@@ -56,7 +56,7 @@ def login():
         return redirect(path)
 
     form = LoginForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit() and request.method == "POST":
         #form.login.data
         #form.password.data
 
