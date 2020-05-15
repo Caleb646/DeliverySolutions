@@ -9,9 +9,11 @@ from database import User
 
 class LoginForm(FlaskForm):
 
-    login = fields.StringField(validators=[validators.required()])
+    pass
 
-    password = fields.PasswordField(validators=[validators.required()])
+    # login = fields.StringField(validators=[validators.required()])
+
+    # password = fields.PasswordField(validators=[validators.required()])
 
 
 class SearchForm(FlaskForm):

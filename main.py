@@ -57,8 +57,19 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = mongo.db.Users.find_one({"username": form.login.data})
-        if user and User.check_pass(user['password'], form.password.data):
+        #form.login.data
+        #form.password.data
+
+        raw_username = request.form.get("username")
+        username = strip_text(raw_username, toStr=True)    
+        user = mongo.db.Users.find_one({"username": username})
+
+        raw_password = request.form.get("password")
+        password = strip_text(raw_password, toStr=True)
+
+        print(password, username)
+
+        if user and User.check_pass(user['password'], password):
             user_obj = User(username=user['username'], password=user["password"],
                     email=["email"], roles=user["roles"])
             login_user(user_obj)

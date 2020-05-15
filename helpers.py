@@ -136,12 +136,14 @@ def user_has_role(user, required_roles):
     return decorator
 
 
-def strip_text(text: list, turnto_int=False):
+def strip_text(text: list, turnto_int=False, toStr=False):
     """Takes a list of tag numbers that along with additional chrs.
     These additional chrs are strip, the tag number is converted to an 
     integer and appended to a list which is then returned."""
 
     tagnum_list = []
+
+    wordInput = ""
 
     if turnto_int:
 
@@ -151,6 +153,20 @@ def strip_text(text: list, turnto_int=False):
             print(stripped_text)
 
             tagnum_list.append(stripped_text)
+
+    if toStr:
+
+        for chr in text:
+            
+            stripped_text = sub("[() {}, <> ]", "", chr)
+
+            print(stripped_text)
+
+            wordInput += stripped_text
+
+        return wordInput
+
+            
     else:
 
         for chr in text:
