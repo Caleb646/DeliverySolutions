@@ -1,17 +1,10 @@
 {% extends "admin/index.html" %}
 
 
-{% block title %}Admin Dashboard{% endblock %}
 {% block head %}
 {{ super() }}
-    <title>Homepage</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin/home.css') }}">
+{% block title %}{% endblock %}
 {% endblock %}
 
 {% block content %}
-    <header>
-            <div class="title">
-
-            </div>
-        </header>
 {% endblock %}
