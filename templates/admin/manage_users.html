@@ -42,44 +42,88 @@
             <p class="masthead-subheading font-weight-light mb-5">Quick and Easy Access for all Parties Involved</p>
         </div>
     </header>
-        <div class="form-check">
-            <form method="POST" action="">
-                {{ form.hidden_tag() }}
-                <fieldset class="form-group">
-                    <h3 class="text-white">{{message}}</h3>
-                    <legend class="border-bottom mb-4 text-white">{{title}}</legend>
-                    {% if form.choices.errors %}
-                    <div class="invalid-feedback">
-                        {% for error in form.choices.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
+    <div class="container">
+        <div class="row text-white">
+            <div class="form-check">
+                <div class="input-group col-sm-12 col-md-8 col-lg-8 col-xl-8 mt-4">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        <fieldset class="form-group">
+                            <h4 class="text-white">{{message}}</h4>
+                            <legend class="border-bottom mb-4 text-white">{{title}}</legend>
+                            {% if form.choices.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.choices.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% for choice in form.choices.choices %}
+                                <div class="form-check text-white">
+                                    <input  class="form-check-input" type="checkbox" id="defaultCheck1" name="user-data" value={{choice[0]}}>
+                                    <label class="form-check-label" for="defaultCheck1">
+                                    {{choice[1]}}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </fieldset>
                     </div>
-                    {% endif %}
-                    {% for choice in form.choices.choices %}
-                        <div class="form-check text-white">
-                            <input  class="form-check-input" type="checkbox" id="defaultCheck1" name="user-data" value={{choice[0]}}>
-                            <label class="form-check-label" for="defaultCheck1">
-                            {{choice[1]}}
-                            </label>
-                        </div>
-                    {% endfor %}
-                </fieldset>
-                <div class="form-group">
-                    <button type="button" class="btn btn-secondary btn-md" name="bsubmit" value="Remove User">Large button</button>
-                    <br><input type="submit" name="bsubmit" value="Remove User">
-                    <input type="submit" name="bsubmit" value="Change Password"><br><br>
-                    {{form.editable_fields.label}}
-                    {{form.editable_fields}}
-                    {{form.change_to.label}}
-                    {{form.change_to}}
-                    <input type="submit" name="bsubmit" value="Change User Info"><br><br>
-                    <input type="submit" name="bsubmit" value="Change Role To">
-                    {{form.roles}}<br><br>
-                    <input type="submit" name="bsubmit" value="Add Client">
-                    {{form.add_client}}<br><br>
+                    <div class="input-group col-sm-12 col-md-12 col-lg-12 col-xl-12 mt-4">
+                        <h2>Instructions</h2>
+                    <p class="lead">When removing a User or changing their password you need have one selected above.<br>
+                        To change a field you also need to have a user selected, select the field you wish
+                        to edit, and type the new value for the field.<br>
+                        To change a role simply select a user and select a new role that you would like them to have.<br>
+                        To add a client simply type what you want their username to be and click submit.<br>
+                    </p>
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
+
+                <div class="form-group">
+
+                    <div class="container">
+
+                    <div class="row text-white">
+                        <div class="input-group col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4">
+                            <h4>Edit/Remove User</h4>
+                            <p>
+                            <button type="submit" class="btn btn-secondary btn-md" name="bsubmit" value="Remove User">Remove User</button>
+                            <button type="submit" class="btn btn-secondary btn-md" name="bsubmit" value="Change Password">Change Password</button>
+                            </p>
+                        </div>
+                            <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4">
+                                <h4>Change User Fields</h4>
+                                    <div class="input-group mb-3">
+                                        {{form.editable_fields}}
+                                        {{form.change_to}}
+                                        <div class="input-group-append">
+                                          <button class="btn btn-secondary" type="submit" name="bsubmit" value="Change User Info">Submit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="input-group col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4">
+                                    <h4>Change User Roles</h4>
+                                    <div class="input-group mb-3">
+                                        {{form.roles}}
+                                        <div class="input-group-append">
+                                          <button class="btn btn-secondary" type="submit" name="bsubmit" value="Change Role To">Submit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="input-group col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4">
+                                    <h4>Add Client</h4>
+                                    <div class="input-group mb-3">
+                                        {{form.add_client}}
+                                        <div class="input-group-append">
+                                          <button class="btn btn-secondary" type="submit" name="bsubmit" value="Change Role To">Submit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>

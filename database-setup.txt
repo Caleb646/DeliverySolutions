@@ -20,7 +20,7 @@ MetaData
 
 {Name:"Inv Data", "shipment num": 1, "tag num": 1}
 {Name:"Designer Info", "Designers":['JOHN', 'PAUL', 'MARY', 'JONE']}
-{"Name": "User Ids", "id": 1, "Editable Fields":["email", "username"]}
+{"Name": "User Ids", "id": 1, "Editable Fields":["email"]}
 {"Name": "Prices", "Storage Price": .10}
 ""For each Designer""
 [{Name:"JOHN", "clients":["BOB", "JANE"]}

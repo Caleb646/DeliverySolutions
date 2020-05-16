@@ -196,7 +196,6 @@ def remove_single_row(data_list: list, key, db):
     the db and delete it."""
 
     for data in data_list:
-
         db["Users"].remove({key: data})
 
 

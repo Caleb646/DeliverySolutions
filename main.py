@@ -271,6 +271,8 @@ def admin_manage_users():
     meta_list = db["MetaData"].find_one({"Name": "User Ids"})
 
     editable_list = meta_list["Editable Fields"]
+    print(editable_list, "edit list")
+    print(meta_list, "meta list")
 
     form.choices.choices = [(row['_id'], (row["username"],
                                            row["email"],
@@ -282,7 +284,7 @@ def admin_manage_users():
 
     title = "All Current Users"
 
-    if form.validate_on_submit():
+    if form.validate_on_submit() and request.method == "POST":
 
         data = request.form.getlist("user-data")
 
@@ -292,7 +294,7 @@ def admin_manage_users():
 
             if request.form["bsubmit"] == "Remove User":
 
-                remove_single_row(userid_list, "username", db)
+                remove_single_row(userid_list, "_id", db)
 
                 message = "User was Removed"
 
@@ -357,7 +359,7 @@ def admin_manage_users():
 
             return render_template("admin/manage_users.html", form=form)
 
-    return render_template("admin/manage_users.html", form=form, message=first_message, title=title)
+    return render_template("admin/manage_users.html", form=form, message=first_message, title=title, editable=editable_list)
 
 
 @app.route("/admin/change-password/<userid>", methods=("GET", "POST"), endpoint="admin_user_password")
