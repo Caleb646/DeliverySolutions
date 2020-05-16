@@ -10,6 +10,8 @@ from helpers import database_search, formatter, user_has_role,\
     validate_client, calculate_storage_fees
 from run import *
 
+"""TODO before pushing. change urls in js scripts"""
+
 #init_db()
 
 #calculate_storage_fees(db)
