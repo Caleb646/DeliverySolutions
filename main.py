@@ -294,11 +294,13 @@ def admin_manage_users():
 
             if request.form["bsubmit"] == "Remove User":
 
-                remove_single_row(userid_list, "_id", db)
-
                 username = find_user(user_list, "username", userid_list)
 
-                remove_user("Designers", username, "MetaData", db)
+                remove_single_row(userid_list, "_id", db)
+
+                print(username)
+
+                remove_user("Designers", username, "MetaData", db, delfromArray=True)
 
                 remove_user("Designer", username, "AllInv", db)
 

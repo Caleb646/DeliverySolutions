@@ -196,24 +196,30 @@ def remove_single_row(data_list: list, key, db):
     the db and delete it."""
 
     for data in data_list:
+
+        print(data)
+
         db["Users"].remove({key: data})
 
-def remove_user(keytofind, valuetodelete, table, db, fromArray=False):
+def remove_user(keytofind, valuetodelete, table, db, delfromArray=False):
 
-    if fromArray:
+    if delfromArray:
 
-        db[table].update({"$pull": {keytofind: {"$in":[valuetodelete]}}})
+        print(keytofind, valuetodelete)
+        db[table].update( {keytofind:valuetodelete},
+            {"$pull": {keytofind: {"$in":[valuetodelete]}}}
+            )
 
     else:
 
         db[table].remove({keytofind:valuetodelete})
 
 
-def find_user(userlist, keywanttofind, id=None):
+def find_user(userlist, keywanttofind, Uid=None):
 
     for row in userlist:
-
-        if row["_id"] == id:
+        
+        if row["_id"] == Uid[0]:
 
             return row[keywanttofind]
 
