@@ -7,7 +7,7 @@ from forms import LoginForm, SearchForm, EditForm, UserEditForm, UserPasswordFor
 from helpers import database_search, formatter, user_has_role,\
     strip_text, deleteby_tagnum, moveby_tagnum, remove_single_row, update_single_field,\
     validate_password, change_password, validate_username, create_worker, create_user,\
-    validate_client, calculate_storage_fees
+    validate_client, calculate_storage_fees, remove_user, find_user
 from run import *
 
 """TODO before pushing. change urls in js scripts"""
@@ -295,6 +295,12 @@ def admin_manage_users():
             if request.form["bsubmit"] == "Remove User":
 
                 remove_single_row(userid_list, "_id", db)
+
+                username = find_user(user_list, "username", userid_list)
+
+                remove_user("Designers", username, "MetaData", db)
+
+                remove_user("Designer", username, "AllInv", db)
 
                 message = "User was Removed"
 

@@ -198,6 +198,29 @@ def remove_single_row(data_list: list, key, db):
     for data in data_list:
         db["Users"].remove({key: data})
 
+def remove_user(keytofind, valuetodelete, table, db, fromArray=False):
+
+    if fromArray:
+
+        db[table].update({"$pull": {keytofind: {"$in":[valuetodelete]}}})
+
+    else:
+
+        db[table].remove({keytofind:valuetodelete})
+
+
+def find_user(userlist, keywanttofind, id=None):
+
+    for row in userlist:
+
+        if row["_id"] == id:
+
+            return row[keywanttofind]
+
+
+
+
+
 
 def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, db, db_table="Users",\
                         array=False, save_array=False):
