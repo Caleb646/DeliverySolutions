@@ -29,7 +29,6 @@ def load_user(username):
     this user throughout."""
 
     user = db["Users"].find_one({"username": username})
-    print(f"user id and user: {username, user}")
     if not user:
         return None
     return User(username=user['username'], password=user["password"],
@@ -54,7 +53,7 @@ def login():
     if current_user.is_authenticated:
         user = mongo.db.Users.find_one({"username": current_user.username})
         path = User.check_roles(user)
-        print(path)
+
         return redirect(path)
 
     form = LoginForm()
@@ -68,8 +67,6 @@ def login():
 
         raw_password = request.form.get("password")
         password = strip_text(raw_password, toStr=True)
-
-        print(password, username)
 
         if user and User.check_pass(user['password'], password):
             user_obj = User(username=user['username'], password=user["password"],
@@ -132,8 +129,6 @@ def admin_search():
         designer = form.designer.data
         client = form.client.data
 
-        print(f'tag num, shipment num, designer, client {tag_num, shipment_num, designer, client}')
-
         data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": designer, "Client": client}
 
         json_dict = json.dumps(data_dict)
@@ -187,12 +182,10 @@ def admin_edit():
     """
 
     json_data = request.args["data"]
-    print(json_data)
     search_data = json.loads(json_data)
 
     database_data, title= database_search(search_data, db)
     formatted_data = formatter(database_data)
-    print(database_data, title)
 
     form = EditForm()
     form.choices.choices = formatted_data
@@ -223,8 +216,6 @@ def admin_edit():
 
         if request.form["bsubmit"] == "Delete":
 
-            print(request.form.getlist("inv-data"))
-
             data = request.form.getlist("inv-data")
 
             tagnum_list = strip_text(data, turnto_int=True)
@@ -242,9 +233,7 @@ def admin_edit():
 def fill_client_field(designer):
 
     js_Array = []
-    print(js_Array)
 
-    print(f"Designer: {designer}")
     meta_data = db["Users"].find_one({"username": designer})
 
     client_list = meta_data["clients"]
@@ -271,8 +260,6 @@ def admin_manage_users():
     meta_list = db["MetaData"].find_one({"Name": "User Ids"})
 
     editable_list = meta_list["Editable Fields"]
-    print(editable_list, "edit list")
-    print(meta_list, "meta list")
 
     form.choices.choices = [(row['_id'], (row["username"],
                                            row["email"],
@@ -455,8 +442,6 @@ def admin_create_user():
 
             client_list = clients.strip().upper().split(",")
 
-            print(client_list)
-
             create_user(username, password, email, client_list, db)
 
             message = "User was Successfully Created."
@@ -479,10 +464,8 @@ def admin_storage_fees():
 
     meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
 
-    print(meta_data)
-
     designer_list = meta_data["Designers"]
-    print(designer_list)
+
     form = StorageFees()
 
     form.designers.choices = [(designer, designer) for designer in designer_list]
@@ -517,19 +500,15 @@ def admin_show_fees():
 
     search_data = json.loads(json_data)
 
-    print(f'search data {search_data}')
 
     db_data, title = database_search(search_data, db)
 
     title = "Current Storage Fees for " + title
 
-    print(db_data)
 
     show_data = [(row["_id"], row["Designer"], row["Client"], row['Date Entered'],
                   row["Storage Fees"])
                   for row in db_data]
-
-    print(show_data)
 
     return render_template("admin/show-fees.html", data=show_data, title=title)
 
@@ -643,8 +622,6 @@ def super_employee_search():
         designer = form.designer.data
         client = form.client.data
 
-        print(f'tag num, shipment num, designer, client {tag_num, shipment_num, designer, client}')
-
         data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": designer, "Client": client}
 
         json_dict = json.dumps(data_dict)
@@ -665,12 +642,10 @@ def super_employee_edit():
     """
 
     json_data = request.args["data"]
-    print(json_data)
     search_data = json.loads(json_data)
 
     database_data, title = database_search(search_data, db)
     formatted_data = formatter(database_data)
-    print(database_data, title)
 
     form = EditForm()
     form.choices.choices = formatted_data
@@ -699,7 +674,6 @@ def super_employee_edit():
             return redirect(url_for(".super_employee_search"))
 
         if request.form["bsubmit"] == "Delete":
-            print(request.form.getlist("inv-data"))
 
             data = request.form.getlist("inv-data")
 
@@ -724,25 +698,19 @@ def super_employee_add_inv():
     form.designer.choices.insert(0, ('None', 'None'))
     form.client.choices.insert(0, ('None', 'None'))
 
-    # if form.validate_on_submit():
-
-    #     designer = form.designer.data
-    #     client = form.client.data
-
-    #     #data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": designer, "Client": client}
-
-    #     #json_dict = json.dumps(data_dict)
-
-    #     return render_template("super-employee/add-inv.html", form=form)
-
     return render_template("super-employee/add-inv.html", form=form)
 
 
-@app.route("/super_employee/add-inv-success/<data>", methods=("GET", "POST"), endpoint="super_employee_add_inv_success")
+@app.route("/super_employee/add-inv/success", methods=("GET", "POST"), endpoint="super_employee_add_inv_success")
 @login_required
 @user_has_role(user=current_user, required_roles=("super_employee"))
-def super_employee_add_inv_success(data):
+def super_employee_add_inv_success():
 
+    print("at success page")
+
+    rawdata_list = request.args["data"]
+
+    print("data list", rawdata_list)
 
     return render_template("super-employee/add-inv-success.html")
 

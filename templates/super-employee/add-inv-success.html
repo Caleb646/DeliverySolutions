@@ -46,38 +46,8 @@
 
     <div class="container text-white">
         <h3>Success!</h3>
-        <h4>The items below were added to {{designer+"'s"}} inventory.</h4>
-    
-        <table class="table text-white">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Tag Number</th>
-                <th scope="col">Shipment Number</th>
-                <th scope="col">Client</th>
-                <th scope="col">Description</th>
-                <th scope="col">Storage Fees</th>
-                <th scope="col">Date Entered</th>
-                <th scope="col">Date Last Paid</th>
-              </tr>
-            </thead>
-                    {% for choice in data %}
-    
-                    <tbody>
-                        <tr>
-                          <th scope="row">#</th>
-                          <td>{{choice['_id']}}</td>
-                          <td>{{choice['shipment num']}}</td>
-                          <td>{{choice['Client']}}</td>
-                          <td>{{choice['Description']}}</td>
-                          <td>{{choice['Storage Fees']}}</td>
-                          <td>{{choice['Date Entered'].date()}}</td>
-                          <td>{{choice['Paid Last'].date()}}</td>
-                        </tr>
-                    </tbody>
-                    {% endfor %}
-                </table>
-            </div>
+        <h4>The items were added to {{designer+"'s"}} inventory.</h4>
+    </div>
     
             {{ link | safe }}
     

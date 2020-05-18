@@ -389,6 +389,20 @@ def calculate_storage_fees(db, allinv_tblname="AllInv", price_tblname="MetaData"
                                               {"$set": {"Storage Fees": storage_fees, "Paid Last": tdys_date}})
 
 
+def enter_data(data_list: list, db):
+
+    table = "AllInv"
+    metaTable = "MetaData"
+    columnCount = 4
+
+    metadata = db[metaTable].find_one({"Name": "Inv Data"})
+    currentShipnum = metadata["shipment num"]
+    currentTagnum = metadata["tag num"]
+
+    inv_data = []
+
+    for data in data_list:
+        pass
 
 
 
