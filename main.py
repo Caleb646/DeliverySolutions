@@ -145,7 +145,7 @@ def admin_search():
 
 @app.route("/admin/search/<designer>", endpoint="chosen_designer")
 @login_required
-@user_has_role(user=current_user, required_roles=("admin", "super_employee"))
+@user_has_role(user=current_user, required_roles=("admin"))
 def chosen_designer(designer):
 
     """This func works with the admin_search function and the javascript n search.html.
@@ -297,8 +297,6 @@ def admin_manage_users():
                 username = find_user(user_list, "username", userid_list)
 
                 remove_single_row(userid_list, "_id", db)
-
-                print(username)
 
                 remove_user("Designers", username, "MetaData", db, delfromArray=True)
 
@@ -720,7 +718,65 @@ def super_employee_add_inv():
 
     form = AddForm()
 
+    meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
+    designer_list = meta_data["Designers"]
+    form.designer.choices = [(designer, designer) for designer in designer_list]
+    form.designer.choices.insert(0, ('None', 'None'))
+    form.client.choices.insert(0, ('None', 'None'))
+
+    # if form.validate_on_submit():
+
+    #     designer = form.designer.data
+    #     client = form.client.data
+
+    #     #data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": designer, "Client": client}
+
+    #     #json_dict = json.dumps(data_dict)
+
+    #     return render_template("super-employee/add-inv.html", form=form)
+
     return render_template("super-employee/add-inv.html", form=form)
+
+
+@app.route("/super_employee/add-inv-success/<data>", methods=("GET", "POST"), endpoint="super_employee_add_inv_success")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_add_inv_success(data):
+
+
+    return render_template("super-employee/add-inv-success.html")
+
+
+@app.route("/super_employee/add-inv/<designer>", endpoint="chosen_designer_super_employee")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def chosen_designer_super_employee(designer):
+
+    """This func works with the admin_search function and the javascript n search.html.
+    In search.html, when a designerfrom the designer dropdown list is selected
+    the javascript in search.html picks up thedesigner and fetches this url /admin/search + designer.
+    With the designer name this func is able to query the database and grab the clients associated with
+    it. This func then jsons the db response and returns it so the js can grab it unjson it
+    and add the client names to the selectfield."""
+
+    js_Array = []
+
+    meta_data = db["Users"].find_one({"username": designer})
+
+    if meta_data is None:
+
+        return jsonify({"clients": ["None"]})
+
+    else:
+        client_list = meta_data["clients"]
+
+        for client in client_list:
+
+            js_Array.append(client)
+
+        js_Array.insert(0, "None")
+
+        return jsonify({"clients": js_Array})
 
 
 """Super Employee Views End"""

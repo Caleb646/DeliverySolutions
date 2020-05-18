@@ -44,31 +44,47 @@
         </div>
     </header>
 
-    <div class="container">
-      <div class="jumbotron text-center bg-secondary text-white">
-          <h1>Todo List</h1>
-          <p class="lead"> </p>
-      </div>
-      <div class="row text-white">
-          <div id="Inventory System" class="col-md-6 col-lg-6 col-xl-6 mt-5">
-              <h2>Known Issues</h2>
-              <p></p>
-          </div>
-          <div id="Inventory System" class="col-md-6 col-lg-6 col-xl-6 mt-5">
-              <h2>Create Users/Workers</h2>
-              <p></p>
-          </div>
-      </div>
-      <hr>
-  </div>
+    <div class="container text-white">
+        <h3>Success!</h3>
+        <h4>The items below were added to {{designer+"'s"}} inventory.</h4>
+    
+        <table class="table text-white">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Tag Number</th>
+                <th scope="col">Shipment Number</th>
+                <th scope="col">Client</th>
+                <th scope="col">Description</th>
+                <th scope="col">Storage Fees</th>
+                <th scope="col">Date Entered</th>
+                <th scope="col">Date Last Paid</th>
+              </tr>
+            </thead>
+                    {% for choice in data %}
+    
+                    <tbody>
+                        <tr>
+                          <th scope="row">#</th>
+                          <td>{{choice['_id']}}</td>
+                          <td>{{choice['shipment num']}}</td>
+                          <td>{{choice['Client']}}</td>
+                          <td>{{choice['Description']}}</td>
+                          <td>{{choice['Storage Fees']}}</td>
+                          <td>{{choice['Date Entered'].date()}}</td>
+                          <td>{{choice['Paid Last'].date()}}</td>
+                        </tr>
+                    </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+    
+            {{ link | safe }}
+    
 
-</div> 
-{% block content %} 
-{% endblock %}
-  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 </body>
 
 </html>
-

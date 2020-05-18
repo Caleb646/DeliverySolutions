@@ -1,40 +1,113 @@
-{% extends 'super-employee/index.html' %}
+<!doctype html>
+<html lang="en">
+  <head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-{% block head %} {% endblock head %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}  <!--ADD!!! TITLE!!!-->
 
-{{ super() }}
-{% block content %}
+  </head>
 
-<div class="content-section">
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">{{title}}</legend>
-                {% if form.choices.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.choices.errors %}
-                        <span>{{ error }}</span>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {% for choice in form.choices.choices %}
-                    <div class="form-check">
-                        <input type="checkbox" id="vehicle1" name="inv-data" value={{choice[1]}}>
-                        {{choice[1]}}
-
-                    </div>
-                {% endfor %}
-            </fieldset>
-            <div class="form-group">
-                <input type="submit" name="bsubmit" value="Delete">
-                {{form.movetto_field.label}}
-                {{form.movetto_field}}
-                {{form.client.label}}
-                {{form.client}}
-                <input type="submit" name="bsubmit" value="Move To">
+<body class="bg-dark">
+  <div id="page-content">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a href="#" class="navbar-brand mr-3">Super Employee</a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav">
+                    <a href="/super_employee/home" class="nav-item nav-link active">Home</a>
+                    <a href="/super_employee/search" class="nav-item nav-link active">Search</a>
+                    <a href="/super_employee/storage-fees" class="nav-item nav-link active">Storage Fees</a>
+                    <a href="/super_employee/add-inv" class="nav-item nav-link active">Add Inventory</a>
+                    <a href="/logout" class="nav-item nav-link active">Logout</a>
+                  </div>
             </div>
-        </form>
+        </div>    
+    </nav>
+
+    <header class="masthead bg-secondary text-white text-center mb-5 bg-secondary">
+        <div class="container d-flex align-items-center flex-column">
+            <img class="masthead-avatar mb-5" src="" alt="" />
+            <h1 class="masthead-heading text-uppercase mb-0">Delivery Solutions</h1>
+            <div class="divider-custom divider-light">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+            <p class="masthead-subheading font-weight-light mb-5">Quick and Easy Access for all Parties Involved</p>
+        </div>
+    </header>
+
+<div class="container text-white">
+
+    
+
+    <div class="row">
+
+        <div class="input-group col-sm-12 col-md-6 col-lg-12 col-xl-12 my-4">
+            <h2>Instructions</h2>
+            <p class="lead">
+                To move an item from one designers inventory to another you have to
+                select the new designer that you want to move the item and then select 
+                a client that its going with as well and the press Move To.
+            </p>
+
+        </div>
+
     </div>
+
+</div>
+
+<div class="container text-white">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">{{title}}</legend>
+            {% if form.choices.errors %}
+            <div class="invalid-feedback">
+                {% for error in form.choices.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% for choice in form.choices.choices %}
+                <div class="form-check">
+                    <input type="checkbox" id="vehicle1" name="inv-data" value={{choice[1]}}>
+                    {{choice[1]}}
+
+                </div>
+            {% endfor %}
+        </fieldset>
+        <div class="form-group">
+
+            <div class="container">
+                <div class="row text-white">
+                    <div class="input-group col-sm-12 col-md-6 col-lg-12 col-xl-12 mt-2 ml-2 mr-2 px-2 py-2">
+                        <div class="form-group">
+                            <label for="">Move Item to this Designer's Inventory</label>
+                            {{form.movetto_field}}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Clients</label>
+                            {{form.client}}
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-secondary">Move to</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
 
     <script>
         let designer_select = document.getElementById("movetto_field");
@@ -59,4 +132,9 @@
         }
     </script>
 
-{% endblock %}
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+
+</html>

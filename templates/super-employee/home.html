@@ -1,20 +1,10 @@
 {% extends "super-employee/index.html" %}
 
 
-{% block title %}My Home{% endblock %}
 {% block head %}
 {{ super() }}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin/home.css') }}">
+{% block title %}{% endblock %}
 {% endblock %}
 
 {% block content %}
-{{super()}}
-
-<div class="about">
-
-    <h3 > Welcome {{current_user.username}}</h3>
-    <p>to our inventory management site. You can
-    search the items that we have stored for you.</p>
-
-</div>
 {% endblock %}
