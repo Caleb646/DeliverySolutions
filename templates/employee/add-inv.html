@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}  <!--ADD!!! TITLE!!!-->
+
+  </head>
+
+<body class="bg-dark">
+  <div id="page-content">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a href="#" class="navbar-brand mr-3">Employee</a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav">
+                    <a href="/employee/home" class="nav-item nav-link active">Home</a>
+                    <a href="/employee/search" class="nav-item nav-link active">Search</a>
+                   
+                    <a href="/employee/add-inv" class="nav-item nav-link active">Add Inventory</a>
+                    <a href="/logout" class="nav-item nav-link active">Logout</a>
+                  </div>
+            </div>
+        </div>    
+    </nav>
+
+    <header class="masthead bg-secondary text-white text-center mb-5 bg-secondary">
+        <div class="container d-flex align-items-center flex-column">
+            <img class="masthead-avatar mb-5" src="" alt="" />
+            <h1 class="masthead-heading text-uppercase mb-0">Delivery Solutions</h1>
+            <div class="divider-custom divider-light">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                <div class="divider-custom-line"></div>
+            </div>
+            <p class="masthead-subheading font-weight-light mb-5">Quick and Easy Access for all Parties Involved</p>
+        </div>
+    </header>
+
+<div class="container text-white">
+
+ <form method="POST" action="" id="add-inv">
+     {{ form.hidden_tag() if form.hidden_tag }}
+
+     {{ form.designer.label}}
+     {{ form.designer}}
+     {{ form.client.label }}
+     {{ form.client }}<br><br>
+
+     <table id="data_table" class="table-dark">
+
+        <thead>
+
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Volume</th>
+            <th scope="col">Description</th>
+            <th scope="col">Location</th>
+            <th scope="col">Image Number</th>
+        </tr>
+
+        </thead>
+
+        <tbody id="data-body"></tbody>
+
+        <!-- <tr>
+             <td>{{ form.volume}}</td>
+             <td>{{ form.description}}</td>
+             <td>{{ form.location}}</td>
+             <td>{{ form.image_num}}</td>
+         </tr>-->
+
+     </table>
+
+     <button type="button" id="add-btn" class="btn btn-secondary">Add Row</button>
+     <button type="submit" class="btn btn-secondary">Submit</button>
+    <!--<br><br><button id="add-btn">Add Row</button><br><br>
+    {{ form.submit() }}-->
+    </form>
+
+</div>
+
+        {{ link | safe }}
+       
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script>
+    let form = document.getElementById("add-inv");
+    let table = document.getElementById("data_table");
+    let tableBody = document.getElementById("data-body");
+    let designer_select = document.getElementById("designer");
+    let client_select = document.getElementById("client");
+    let row_id = 1;
+    let btn_key = 10;
+
+    designer_select.onchange = function() {
+        designer = designer_select.value;
+
+        fetch("/super_employee/add-inv/" + designer).then(function(response) {
+           response.json().then(function(data) {
+
+                let optionHTML = "";
+
+                for(let client of data.clients) {
+                    optionHTML += "<option value=" + client + ">" + client + "</option>";
+
+                }
+
+                client_select.innerHTML = optionHTML;
+
+               });
+        });
+    }
+    function add_row(){
+
+        let row = document.createElement("tr");
+        row.setAttribute('id', row_id);
+        let btn_id = row_id + btn_key;
+
+        var fields = new Array(
+            "<td><button id="+btn_id+" onclick=remove_row(this.id)>Remove row</button></td>",
+            "<td><input type='Text' name='volume'></td>",
+            "<td><input type='Text' name='description'></td>",
+            "<td><input type='Text' name='location'></td>",
+            "<td><input type='Text' name='image_number'></td>",
+            )
+
+
+        row_id = row_id + 1;
+        row.innerHTML = fields.join("");
+        tableBody.appendChild(table.appendChild(row));
+
+        document.getElementById(btn_id).addEventListener("click", function(event){
+            event.preventDefault();
+            remove_row(btn_id);
+            });
+
+
+    }
+
+    document.getElementById("add-btn").addEventListener("click", function(event){
+    event.preventDefault();
+    add_row();
+
+    });
+
+    function remove_row(b_id){
+        let therow_id = b_id - btn_key;
+        let delElement = document.getElementById(therow_id);
+        delElement.parentNode.removeChild(delElement);
+    }
+    
+    form.onsubmit = function submitted() {
+        //pulls
+        let allData = new Array;
+        let rowData = new Array;
+        let designer_select2 = document.getElementById("designer").value;
+        let client_select2 = document.getElementById("client").value;
+        let designerArray = [designer_select2, client_select2];
+        allData.push(designerArray);
+
+        let rowCount = tableBody.rows.length;
+
+        for(i=0; i < rowCount; i++) {
+
+            let cellBody = tableBody.rows[i].cells;
+            let cellLength = cellBody.length;
+
+            let rowData = new Array;
+
+            for(j=0; j < cellLength; j++ ) {
+
+                let data = cellBody[j].children[0].value;
+
+                rowData.push(data);
+
+                if(j+1 >= cellLength) {                           
+                    allData.push(rowData);
+                }
+
+            }
+
+            if(i+1 >= rowCount) {
+                //added return false so browser would redirect.
+                let dataJson = JSON.stringify(allData);
+                window.location.href = "https://deliverysolutions.herokuapp.com/employee/add-inv/success?data="+dataJson;
+                return false;
+            }
+
+        }
+    }
+
+</script>
+
+</body>
+
+</html>
