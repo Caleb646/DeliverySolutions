@@ -1,8 +1,55 @@
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import current_app
 from flask_login import UserMixin
+from flask_pymongo import PyMongo
+from random import randint
 from datetime import datetime
-import uuid
-from app import db, ADMIN_PASS, SUPEREMPLOYEE_PASS, EMPLOYEE_PASS, USER_PASS
+from app.constants import roles_routes, db_collections,\
+     user_keys, meta_keys, userinv_keys
+from app import ADMIN_PASS,\
+     SUPEREMPLOYEE_PASS, EMPLOYEE_PASS, USER_PASS, db
+
+#Collections
+USER_COLLECTION = db_collections[0]
+META_COLLECTION = db_collections[1]
+#User collection keys
+USERNAME_USERKEY = user_keys[1]
+USER_ID_USERKEY = user_keys[0]
+USER_PASSWORD_USERKEY = user_keys[2]
+USER_EMAIL_USERKEY = user_keys[4]
+USER_ROLES_USERKEY = user_keys[3]
+USER_CLIENT_USERKEY = user_keys[5]
+#Meta collection keys
+META_ID_KEY = meta_keys[0]
+META_ID_VALUE = meta_keys[1]
+SHIPMENT_NUM_METAKEY = meta_keys[2]
+TAG_NUM_METAKEY = meta_keys[3]
+DESIGNERS_METAKEY = meta_keys[4]
+USER_ID_METAKEY = meta_keys[5]
+EDITABLE_FIELDS_METAKEY = meta_keys[6]
+STORAGE_PRICE_METAKEY = meta_keys[7]
+#User inventory collection keys
+TAG_NUM_USERINVKEY = userinv_keys[0]
+SHIPMENT_NUM_USERINVKEY = userinv_keys[1]
+DESIGNER_USERINVKEY = userinv_keys[2]
+CLIENT_USERINVKEY = userinv_keys[3]
+VOLUME_USERINVKEY = userinv_keys[4]
+DATE_ENTERED_USERINVKEY = userinv_keys[5]
+IMAGE_NUM_USERINVKEY = userinv_keys[6]
+DESCRIPTION_USERINVKEY = userinv_keys[7]
+LOCATION_USERINVKEY = userinv_keys[8]
+STORAGE_FEES_USERINVKEY = userinv_keys[9]
+PAID_LAST_USERINVKEY = userinv_keys[10]
+
+
+class MetaOps:
+
+    @staticmethod
+    def find_one(keyto_find):
+
+        ret = db[META_COLLECTION].find_one({META_ID_KEY:META_ID_VALUE})
+
+        return ret[keyto_find]
 
 
 class User(UserMixin):
@@ -18,6 +65,36 @@ class User(UserMixin):
         self.roles = roles
         self._id = _id
 
+    
+    @staticmethod
+    def find_user(username_val=None, userid_val=None, userid=False, retval=None):
+
+        """Returns user obj using either the username or user id"""
+        
+        if not userid:
+
+            user = db[USER_COLLECTION].find_one({USERNAME_USERKEY:username_val})
+
+            if retval != None and user != None:
+
+                return user[retval]
+
+            else:
+
+                return user
+        
+        else:
+
+            user = db[USER_COLLECTION].find_one({USER_ID_USERKEY:userid_val})
+
+            if retval != None and user != None:
+
+                return user[retval]
+
+            else:
+
+                return user
+
 
     @staticmethod
     def check_pass(passwordin_db, passwordto_check):
@@ -29,14 +106,9 @@ class User(UserMixin):
         """Checks what role the authorized user has and then returns
         the appropriate template path"""
 
-        if "admin" in user["roles"]:
-            return "/admin/home"
-        if "user" in user["roles"]:
-            return "/user/home"
-        if "super_employee" in user["roles"]:
-            return "/super_employee/home"
-        if "employee" in user["roles"]:
-            return "/employee/home"
+        route = roles_routes[user[USER_ROLES_USERKEY][0]]
+
+        return route
 
     @property
     def is_authenticated(self):
@@ -56,67 +128,77 @@ class User(UserMixin):
 
 def init_db():
 
+    inv_size = 10
+
+    starting_users = {"Joe": ["BOB", "JANE","CAT", "JILL","LEVI"], "Bill": ["CALEB","MADDIE", "CHARLIE"]}
+
+    user_list_len = len(starting_users.keys()) - 1
+
     admin_input = input("Type y or n if data should be reentered: ")
 
     if admin_input == "y":
 
-        Users = db["Users"]
+        Users = db[USER_COLLECTION]
 
-        Users.insert_one({"_id": 1, "username": "Caleb", "password" : generate_password_hash(ADMIN_PASS),
-                          "roles" : [ "admin" ], "email" : "calebthomas646@yahoo.com" })
-        Users.insert_one({"_id": 2, "username": "Joe", "password": generate_password_hash(USER_PASS),
-                          "roles": ["user"], "email": "calebthomas646@yahoo.com",
-                           "clients": ["BOB", "JANE","CAT", "JILL","LEVI"]})
-        Users.insert_one({"_id": 3, "username": "Bill", "password": generate_password_hash(USER_PASS),
-                          "roles": ["user"], "email": "calebthomas646@yahoo.com",
-                           "clients": ["CALEB","MADDIE", "CHARLIE"]})
-        Users.insert_one({"_id": 4, "username": "Jill", "password": generate_password_hash(SUPEREMPLOYEE_PASS),
-                          "roles": ["super_employee"], "email": "calebthomas646@yahoo.com"})
-        Users.insert_one({"_id": 5, "username": "Jane", "password": generate_password_hash(EMPLOYEE_PASS),
-                          "roles": ["employee"], "email": "calebthomas646@yahoo.com"})
+        Users.insert_one({USER_ID_USERKEY: 1, USERNAME_USERKEY: "Caleb", USER_PASSWORD_USERKEY : generate_password_hash(ADMIN_PASS),
+                          USER_ROLES_USERKEY : [ "admin" ], USER_EMAIL_USERKEY : "calebthomas646@yahoo.com" })
 
-        # Users.insert_one({"_id": 5, "username": "John", "password": generate_password_hash('Anna'),
-        #                   "roles": ["user"], "email": "calebthomas646@yahoo.com",
-        #                   "clients": ["BOB", "JANE"]})
-        # Users.insert_one({"_id": 6, "username": "Paul", "password": generate_password_hash('Anna'),
-        #                   "roles": ["user"], "email": "calebthomas646@yahoo.com",
-        #                   "clients": [,"CAT", "JILL"]})
-        # Users.insert_one({"_id": 7, "username": "Mary", "password": generate_password_hash('Anna'),
-        #                   "roles": ["user"], "email": "calebthomas646@yahoo.com",
-        #                   "clients": ["LEVI", "CALEB"]})
-        # Users.insert_one({"_id": 8, "username": "Jone", "password": generate_password_hash('Anna'),
-        #                   "roles": ["user"], "email": "calebthomas646@yahoo.com",
-        #                   "clients": ["MADDIE", "CHARLIE"]})
+        Users.insert_one({USER_ID_USERKEY: 2, USERNAME_USERKEY: "Joe", USER_PASSWORD_USERKEY: generate_password_hash(USER_PASS),
+                          USER_ROLES_USERKEY: ["user"], USER_EMAIL_USERKEY: "calebthomas646@yahoo.com",
+                           USER_CLIENT_USERKEY: ["BOB", "JANE","CAT", "JILL","LEVI"]})
 
-        metadata = db["MetaData"]
+        Users.insert_one({USER_ID_USERKEY: 3, USERNAME_USERKEY: "Bill", USER_PASSWORD_USERKEY: generate_password_hash(USER_PASS),
+                          USER_ROLES_USERKEY: ["user"], USER_EMAIL_USERKEY: "calebthomas646@yahoo.com",
+                           USER_CLIENT_USERKEY: ["CALEB","MADDIE", "CHARLIE"]})
 
-        meta_list = [{'Name': "Inv Data", "shipment num": 10, "tag num": 10},
-                    {'Name': "Designer Info", "Designers": ["Joe", "Bill"]},
-                     {"Name": "User Ids", "id": 9, "Editable Fields":["email",]},
-                     {"Name": "Prices", "Storage Price": .10}]
+        Users.insert_one({USER_ID_USERKEY: 4, USERNAME_USERKEY: "Jill", USER_PASSWORD_USERKEY: generate_password_hash(SUPEREMPLOYEE_PASS),
+                          USER_ROLES_USERKEY: ["super_employee"], USER_EMAIL_USERKEY: "calebthomas646@yahoo.com"})
 
-        metadata.insert_many(meta_list)
+        Users.insert_one({USER_ID_USERKEY: 5, USERNAME_USERKEY: "Jane", USER_PASSWORD_USERKEY: generate_password_hash(EMPLOYEE_PASS),
+                          USER_ROLES_USERKEY: ["employee"], USER_EMAIL_USERKEY: "calebthomas646@yahoo.com"})
 
-        all_inv = db["AllInv"]
+        metadata = db[META_COLLECTION]
 
-        inv_data = [{"_id": 1, "shipment num": 1, 'Designer': "Joe",\
-                    "Client": "BOB", "Volume":100, "Date Entered": datetime(2019, 5, 20),\
-                     "Img Num": 1, "Description": "A Table", "Location": "A4",
-                     "Storage Fees": "None", "Paid Last": "None"},
-                    {"_id": 2, "shipment num": 2, 'Designer': "Joe", \
-                     "Client": "JILL", "Volume": 100, "Date Entered": datetime(2019, 5, 10), \
-                     "Img Num": 2, "Description": "A Table", "Location": "B4",
-                     "Storage Fees": "None", "Paid Last": "None"},
-                    {"_id": 3, "shipment num": 3, 'Designer': "Joe", \
-                     "Client": "CALEB", "Volume": 100, "Date Entered": datetime(2019, 2, 5), \
-                     "Img Num": 3, "Description": "A Table", "Location": "C4",
-                     "Storage Fees": "None", "Paid Last": datetime(2019, 8, 10)},
-                    {"_id": 4, "shipment num": 4, 'Designer': "Joe", \
-                     "Client": "CHARLIE", "Volume": 100, "Date Entered": datetime(2019, 3, 20), \
-                     "Img Num": 4, "Description": "A Table", "Location": "D4",
-                     "Storage Fees": "None", "Paid Last": datetime.today()}]
+        meta_list = {META_ID_KEY: META_ID_VALUE, SHIPMENT_NUM_METAKEY: inv_size*100, TAG_NUM_METAKEY: inv_size*100,
+                    DESIGNERS_METAKEY: ["Joe", "Bill"],
+                    USER_ID_METAKEY: 9, EDITABLE_FIELDS_METAKEY:["email",],
+                    STORAGE_PRICE_METAKEY: .10}
 
-        all_inv.insert_many(inv_data)
+        metadata.insert_one(meta_list)
+
+        
+        for i in range(user_list_len+1):
+
+            designer_list = list(starting_users.keys())
+            designer = designer_list[i]
+            inv_data = []
+            DB = db[designer]
+            start_ind = i*inv_size
+
+            for j in range(start_ind, inv_size+start_ind):
+
+                print(j)
+
+                clientList = starting_users[designer]
+
+                listLen = len(clientList) - 1
+
+                index = randint(0, listLen)
+
+                client = clientList[index]
+
+                data = {TAG_NUM_USERINVKEY: j, SHIPMENT_NUM_USERINVKEY: j,\
+                DESIGNER_USERINVKEY: designer, CLIENT_USERINVKEY: client,\
+                VOLUME_USERINVKEY :100,\
+                DATE_ENTERED_USERINVKEY: datetime(2019, i+1, 20),\
+                IMAGE_NUM_USERINVKEY: 1, DESCRIPTION_USERINVKEY: "A Table",\
+                LOCATION_USERINVKEY: "A"+str(j),\
+                STORAGE_FEES_USERINVKEY: 0, PAID_LAST_USERINVKEY: 0}
+
+                inv_data.append(data)
+
+            DB.insert_many(inv_data)
+            inv_data.clear()
 
 
 

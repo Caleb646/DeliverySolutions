@@ -5,7 +5,7 @@ from datetime import datetime
 from re import sub
 
 
-def database_search(data: dict, db):
+def database_search(data: dict, db): 
     """The format of the json data sent
         to this function by /admin/search/ {"tag num": tag_num,
         "shipment num": shipment_num,

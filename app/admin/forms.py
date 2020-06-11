@@ -3,41 +3,17 @@ from wtforms import validators, form, fields, SelectMultipleField, widgets
 from wtforms.fields.html5 import EmailField
 from flask_wtf import FlaskForm
 
+class SearchForm(FlaskForm):
 
-    # login = fields.StringField(validators=[validators.required()])
+    tag_num = fields.IntegerField("Tag Number:", validators=[validators.optional()])
 
-    # password = fields.PasswordField(validators=[validators.required()])
-
-
-# class SearchForm(FlaskForm):
-
-#     tag_num = fields.IntegerField("Tag Number:", validators=[validators.optional()])
-
-#     shipment_num = fields.IntegerField("Shipment Number:", validators=[validators.optional()])
-
-#     designer = fields.SelectField("Designer:", choices=[], validators=[validators.optional()])
-
-#     client = fields.SelectField("Client:", choices=[], validators=[validators.optional()])
-
-#     submit = fields.SubmitField("Submit")
-
-
-class AddForm(FlaskForm):
+    shipment_num = fields.IntegerField("Shipment Number:", validators=[validators.optional()])
 
     designer = fields.SelectField("Designer:", choices=[], validators=[validators.optional()])
 
     client = fields.SelectField("Client:", choices=[], validators=[validators.optional()])
 
-    volume = fields.IntegerField("Volume:", validators=[validators.optional()])
-
-    description = fields.StringField("Description:", validators=[validators.optional()])
-
-    location = fields.StringField("Location:", validators=[validators.optional()])
-
-    image_num = fields.IntegerField("Image number:", validators=[validators.optional()])
-
     submit = fields.SubmitField("Submit")
-
 
 class MultiCheckboxField(SelectMultipleField):
 
@@ -112,16 +88,3 @@ class StorageFees(FlaskForm):
     clients = fields.SelectField("Clients:", choices=[], validators=[validators.optional()])
 
     submit = fields.SubmitField()
-
-
-class UserSearch(FlaskForm):
-
-    tag_num = fields.IntegerField("Tag Number:", validators=[validators.optional()])
-
-    shipment_num = fields.IntegerField("Shipment Number:", validators=[validators.optional()])
-
-    client = fields.SelectField("Client:", choices=[], validators=[validators.optional()])
-
-    submit = fields.SubmitField("Submit")
-
-

@@ -2,27 +2,36 @@ from flask import render_template, redirect, request, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 from app.auth import auth_bp
 from app.database import User
+from app.global_util import strip_text
 from app.auth.forms import LoginForm
-from app import db, login_manager
-import os
+from app.constants import user_keys, db_collections
+from app import login_manager
+
+#Constants. The most used keys used to make a db query
+
+USER_COLLECTION = db_collections[0]
+USERNAME = user_keys[1]
+USER_ID = user_keys[0]
+USER_PASSWORD = user_keys[2]
+USER_EMAIL = user_keys[4]
+USER_ROLES = user_keys[3]
+
 
 
 @login_manager.user_loader
 def load_user(username):
-    """This function looks at the User class in database.py and class the
-    get_id method. Whatever is set to return for that method has to be the unique identifier
-    for that user. It then takes the that identifier, calls the db and is the username
-    exists in the db it will then return a User obj to Flask so that Flask_Login can monitor
-    this user throughout."""
+    """Flask will try to load a user before every request by calling get_id method
+    from the User class on it and feeding the return value to this function.
+    If the username returned from Flask is valid the user will be loaded."""
 
-    user = db["Users"].find_one({"username": username})
+    user = User.find_user(username_val=username)
 
     if not user:
 
         return None
 
-    return User(username=user['username'], password=user["password"],
-                email=["email"], roles=user["roles"], _id=user["_id"])
+    return User(username=user[USERNAME], password=user[USER_PASSWORD],
+                email=[USER_EMAIL], roles=user[USER_ROLES], _id=user[USER_ID])
 
 
 @auth_bp.route("/login", methods=("POST", "GET"), endpoint="login")
@@ -35,7 +44,7 @@ def login():
 
     if current_user.is_authenticated:
 
-        user = db.Users.find_one({"username": current_user.username})
+        user = User.find_user(username_val=current_user.username)
 
         path = User.check_roles(user)
 
@@ -46,17 +55,24 @@ def login():
     if form.validate_on_submit() and request.method == "POST":
 
         raw_username = request.form.get("username")
-        username = strip_text(raw_username, toStr=True)    
-        user = db.Users.find_one({"username": username})
+        username = strip_text(raw_username, toStr=True)  
+        user = User.find_user(username_val=username) 
 
         raw_password = request.form.get("password")
         password = strip_text(raw_password, toStr=True)
 
-        if user and User.check_pass(user['password'], password):
-            user_obj = User(username=user['username'], password=user["password"],
-                    email=["email"], roles=user["roles"])
+        if user and User.check_pass(user[USER_PASSWORD], password):
+
+            user_obj = User(username=user[USERNAME], password=user[USER_PASSWORD],
+                email=[USER_EMAIL], roles=user[USER_ROLES], _id=user[USER_ID])
+
             login_user(user_obj)
-            return redirect("/admin/home")
+
+            newpath = User.check_roles(user)
+
+            print(newpath)
+
+            return redirect(newpath)
 
         else:
             error = "Username or Password was incorrect."
@@ -72,4 +88,4 @@ def logout():
 
     logout_user()
 
-    return redirect(url_for('.home'))
+    return redirect(url_for('base.home'))

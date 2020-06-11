@@ -1,0 +1,63 @@
+Collections
+
+1. Users
+2. MetaData
+3. Each users' username
+
+Users
+
+user_keys = ["_id", "username", "password", "roles", "email", "clients"]
+
+{ "_id" : 1, "username" : "Jane",
+ "password" : "password",
+ "roles" : [ "employee" ], "email" : "calebthomas646@yahoo.com" }
+
+ if user in Users has a role of user this will be there profile setup
+
+ { "_id" : 1, "username" : "Jane",
+ "password" : "password",
+ "roles" : [ "user" ], "email" : "calebthomas646@yahoo.com", "clients":["BOB", "JANE"]}
+
+MetaData
+
+meta_keys = [db_data, shipment_num, tag_num, designers, user_id, editable_fields, storage_price]
+
+//new
+{
+    
+    "meta_id":"db_data", "shipment_num": 1, "tag_num": 1,
+    "designer":['JOHN', 'PAUL', 'MARY', 'JONE'], "user_id": 1, "editable_fields":["email"],
+    "storage_price": .10
+
+}
+
+{meta_id:"JOHN", "clients":["BOB", "JANE"]}
+{meta_id:"PAUL", "clients":["CAT", "JILL"]},
+{meta_id:"MARY", "clients":["LEVI", "CALEB"]},
+{meta_id:"JONE", "clients":["MADDIE", "CHARLIE"]}]
+
+//new
+
+
+//User Inventory
+
+user_keys = [shipment_num, designer, client, volume, date_entered, image_num, description, location, storage_fees, paid_last]
+
+#username will be the identifier
+
+#Pauls Inventory
+
+{"_id": 2, "shipment_num": 2, 'designer': "Paul", \
+"client": "JILL", "volume": 100, "date_entered": date(2019, 5, 10), \
+"image_num": 2, "description": "A Table", "location": "B4",
+"storage_fees": 0, "paid_last": 0}
+
+#Johns Inventory
+
+{"_id": 2, "shipment_num": 2, 'designer': "John", \
+"client": "JILL", "volume": 100, "date_entered": date(2019, 5, 10), \
+"image_num": 2, "description": "A Table", "location": "B4",
+"storage_fees": 0, "paid_last": 0}
+
+
+//End
