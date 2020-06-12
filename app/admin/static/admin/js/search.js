@@ -11,6 +11,7 @@ let designer_select = document.getElementById("designer");
                         let optionHTML = "";
 
                         for(let client of data.clients) {
+                            console.log(client);
                             optionHTML += "<option value=" + client + ">" + client + "</option>";
 
                         }

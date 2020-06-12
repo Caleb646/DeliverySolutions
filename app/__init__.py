@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from flask import Flask, current_app
 from flask_login import LoginManager
 from flask_pymongo import PyMongo
+from flask_bootstrap import Bootstrap
 import os
 
 
@@ -28,6 +29,7 @@ app.config["SECURITY_PASSWORD_SALT"] = PASSWORDSALT
 app.static_folder = 'static'
 #app.config["SECURITY_TOKEN_MAX_AGE"] = True Will set auth token on a timer
 
+bootstrap = Bootstrap(app)
 
 login_manager = LoginManager()
 login_manager.login_view = "/login"

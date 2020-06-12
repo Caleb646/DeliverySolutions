@@ -5,13 +5,14 @@ from flask_pymongo import PyMongo
 from random import randint
 from datetime import datetime
 from app.constants import roles_routes, db_collections,\
-     user_keys, meta_keys, userinv_keys
+     user_keys, meta_keys, userinv_keys, SEARCH_KEY, NULLVALUE
 from app import ADMIN_PASS,\
      SUPEREMPLOYEE_PASS, EMPLOYEE_PASS, USER_PASS, db
 
 #Collections
 USER_COLLECTION = db_collections[0]
 META_COLLECTION = db_collections[1]
+ALL_INV_COLLECTION = db_collections[2]
 #User collection keys
 USERNAME_USERKEY = user_keys[1]
 USER_ID_USERKEY = user_keys[0]
@@ -42,12 +43,36 @@ STORAGE_FEES_USERINVKEY = userinv_keys[9]
 PAID_LAST_USERINVKEY = userinv_keys[10]
 
 
+class AllInvOps:
+
+    @staticmethod
+    def find_all(search_data: dict) -> list: 
+        
+        db_key: tuple = search_data.get(SEARCH_KEY)
+
+        if len(db_key) > 1:
+
+            val1: str = search_data.get(db_key[0])
+            val2: str = search_data.get(db_key[1])
+            
+            db_data: list = db[ALL_INV_COLLECTION].find({db_key[0]:val1, db_key[1]:val2})
+
+            return db_data
+
+        else:
+            val1: str = search_data.get(db_key[0])
+
+            db_data: list = db[ALL_INV_COLLECTION].find({db_key[0]:val1})
+
+            return db_data
+
+
 class MetaOps:
 
     @staticmethod
     def find_one(keyto_find):
 
-        ret = db[META_COLLECTION].find_one({META_ID_KEY:META_ID_VALUE})
+        ret: dict = db[META_COLLECTION].find_one({META_ID_KEY:META_ID_VALUE})
 
         return ret[keyto_find]
 
@@ -106,7 +131,7 @@ class User(UserMixin):
         """Checks what role the authorized user has and then returns
         the appropriate template path"""
 
-        route = roles_routes[user[USER_ROLES_USERKEY][0]]
+        route = roles_routes[user[USER_ROLES_USERKEY][0]][0]
 
         return route
 
@@ -172,7 +197,7 @@ def init_db():
             designer_list = list(starting_users.keys())
             designer = designer_list[i]
             inv_data = []
-            DB = db[designer]
+            DB = db[ALL_INV_COLLECTION]
             start_ind = i*inv_size
 
             for j in range(start_ind, inv_size+start_ind):

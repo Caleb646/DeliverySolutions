@@ -2,7 +2,8 @@ Collections
 
 1. Users
 2. MetaData
-3. Each users' username
+//3. Each users' username
+3. AllInv
 
 Users
 
@@ -17,6 +18,8 @@ user_keys = ["_id", "username", "password", "roles", "email", "clients"]
  { "_id" : 1, "username" : "Jane",
  "password" : "password",
  "roles" : [ "user" ], "email" : "calebthomas646@yahoo.com", "clients":["BOB", "JANE"]}
+
+
 
 MetaData
 
@@ -35,6 +38,18 @@ meta_keys = [db_data, shipment_num, tag_num, designers, user_id, editable_fields
 {meta_id:"PAUL", "clients":["CAT", "JILL"]},
 {meta_id:"MARY", "clients":["LEVI", "CALEB"]},
 {meta_id:"JONE", "clients":["MADDIE", "CHARLIE"]}]
+
+
+//AllInv
+
+{"_id": 2, "shipment_num": 2, 'designer': "Paul", \
+"client": "JILL", "volume": 100, "date_entered": date(2019, 5, 10), \
+"image_num": 2, "description": "A Table", "location": "B4",
+"storage_fees": 0, "paid_last": 0}
+
+//End
+
+
 
 //new
 

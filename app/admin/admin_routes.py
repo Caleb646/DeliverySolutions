@@ -2,10 +2,12 @@ from flask import render_template, redirect, request, url_for, json, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from app.admin.forms import SearchForm, UserEditForm, CreateUser, CreateWorker, UserPasswordForm, EditForm, StorageFees
 from app.admin import admin_bp
-from app.database import User, MetaOps
-from app.global_util import user_has_role
-from app.constants import meta_keys, user_keys, userinv_keys
-from app import db
+from app.database import User, MetaOps, AllInvOps
+from app.admin.admin_util import search_method
+from app.global_util import user_has_role, strip_text
+from app.constants import meta_keys, user_keys,\
+     userinv_keys, SEARCH_KEY, NULLVALUE
+#from app import bootstrap
 
 #Meta collection keys
 SHIPMENT_NUM_METAKEY = meta_keys[2]
@@ -64,8 +66,8 @@ def admin_search():
 
     designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
     form.designer.choices = [(designer, designer) for designer in designer_list]
-    form.designer.choices.insert(0, ('None', 'None'))
-    form.client.choices.insert(0, ('None', 'None'))
+    form.designer.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
+    form.client.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
 
     if form.validate_on_submit():
 
@@ -78,7 +80,9 @@ def admin_search():
         SHIPMENT_NUM_USERINVKEY : shipment_num,
         DESIGNER_USERINVKEY : designer, CLIENT_USERINVKEY : client}
 
-        json_dict = json.dumps(data_dict)
+        new_dict = search_method(data_dict)
+
+        json_dict = json.dumps(new_dict)
 
         return redirect(url_for("admin.admin_edit", data=json_dict))
 
@@ -97,85 +101,75 @@ def chosen_designer(designer):
     it. This func then jsons the db response and returns it so the js can grab it unjson it
     and add the client names to the selectfield."""
 
-    #js_Array = []
-
-    #meta_data = db["Users"].find_one({"username": designer})
-
     client_list = User.find_user(username_val=designer, retval=USER_CLIENT_USERKEY)
 
     if client_list is None:
 
-        return jsonify({"clients": ["None"]})
+        return jsonify({"clients": [NULLVALUE[0]]})
 
     else:
-       #client_list = meta_data["clients"]
 
-        #for client in client_list:
-
-            #js_Array.append(client)
-
-        #js_Array.insert(0, "None")
-
-        client_list.insert(0, "None")
+        client_list.insert(0, NULLVALUE[0])
 
         return jsonify({"clients": client_list})
 
 
-# @admin_bp.route("/admin/edit", methods=("GET", "POST"), endpoint="admin_edit")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("admin"))
-# def admin_edit():
+@admin_bp.route("/edit", methods=("GET", "POST"), endpoint="admin_edit")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_edit():
 
-#     """The format of the json data sent
-#     to this function by /admin/search/ {"tag num": tag_num,
-#     "shipment num": shipment_num,
-#     "Designer": designer, "Client": client}.
-#     """
+    """"""
 
-#     json_data = request.args["data"]
-#     search_data = json.loads(json_data)
+    json_data = json.loads(request.args["data"])
+    print("\n\n in Admin Edit \n\n")
+    db_data = AllInvOps.find_all(json_data)
 
-#     database_data, title= database_search(search_data, db)
-#     formatted_data = formatter(database_data)
+    print(db_data)
 
-#     form = EditForm()
-#     form.choices.choices = formatted_data
+    #database_data, title= database_search(search_data, db)
+    #formatted_data = formatter(database_data)
 
-#     meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
-#     designer_list = meta_data["Designers"]
-#     form.movetto_field.choices = [(designer, designer) for designer in designer_list]
+    form = EditForm()
+    form.choices.choices = db_data
+
+    designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
+    # meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
+    # designer_list = meta_data["Designers"]
+    form.movetto_field.choices = [(designer, designer) for designer in designer_list]
     
-#     client_data = db["Users"].find_one({"username": designer_list[0]})
-#     client_list = client_data["clients"]
-#     form.client.choices = [(client, client) for client in client_list]
+    client_list = User.find_user(username_val=designer_list[0], retval=USER_CLIENT_USERKEY)
+    # client_data = db["Users"].find_one({"username": designer_list[0]})
+    # client_list = client_data["clients"]
+    form.client.choices = [(client, client) for client in client_list]
 
-#     if form.validate_on_submit():
+    if form.validate_on_submit():
 
-#         if request.form["bsubmit"] == "Move To":
+        if request.form["bsubmit"] == "Move To":
 
-#             designer = form.movetto_field.data
+            designer = form.movetto_field.data
 
-#             client = form.client.data
+            client = form.client.data
 
-#             data = request.form.getlist("inv-data")
+            data = request.form.getlist("inv-data")
 
-#             tagnum_list = strip_text(data, turnto_int=True)
+            tagnum_list = strip_text(data, turnto_int=True)
 
-#             moveby_tagnum(designer, client, tagnum_list, db)
+            moveby_tagnum(designer, client, tagnum_list, db)
 
-#             return redirect(url_for(".admin_search"))
+            return redirect(url_for("admin.admin_search"))
 
-#         if request.form["bsubmit"] == "Delete":
+        if request.form["bsubmit"] == "Delete":
 
-#             data = request.form.getlist("inv-data")
+            data = request.form.getlist("inv-data")
 
-#             tagnum_list = strip_text(data, turnto_int=True)
+            tagnum_list = strip_text(data, turnto_int=True)
 
-#             deleteby_tagnum(tagnum_list, db)
+            deleteby_tagnum(tagnum_list, db)
 
-#             return redirect(url_for(".admin_search"))
+            return redirect(url_for("admin.admin_search"))
 
-#     return render_template("admin/edit.html", form=form, title=title)
+    return render_template("admin/edit.html", form=form, dbkeys=userinv_keys)
 
 
 # @admin_bp.route("/admin/edit/<designer>", methods=("GET", "POST"), endpoint="fill_client_field")

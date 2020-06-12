@@ -45,32 +45,36 @@
 
  <form method="POST" action="">
      {{ form.hidden_tag() if form.hidden_tag }}
+     {% from 'bootstrap/form.html' import render_field %}
      <div class="container">
         <div class="row text-white">
-            <div class="input-group col-sm-12 col-md-6 col-lg-12 col-xl-12 mt-2 ml-2 mr-2 px-2 py-2"></div>
+            <div class="input-group col-sm-12 col-md-6 col-lg-12 col-xl-12 mt-2 ml-2 mr-2 px-2 py-2">
                 <div class="form-group">
-                    <label for="exampleInputEmail1">Tag Number</label>
-                    {{ form.tag_num}}
-                </div><br>
+                    {{render_field(form.tag_num)}}
+                </div>
 
                 <div class="form-group">
-                    <label for="exampleInputPassword1">Shipment Number</label>
-                    {{ form.shipment_num}}
-                </div><br>
+                    {{render_field(form.shipment_num)}}
+                </div>
 
-                <div class="form-group">
-                    <label for="exampleInputPassword1">Designer</label>
-                    {{ form.designer}}
-                </div><br>
-
-                <div class="form-group">
-                    <label for="exampleInputPassword1">Client</label>
-                    {{ form.client }}
-                </div><br>
-
-                <button type="submit" class="btn btn-secondary">Submit</button>
-            </div>
-        </div>
+                
+                
+                    </div>
+                        <div class="input-group col-sm-12 col-md-6 col-lg-12 col-xl-12 mt-2 ml-2 mr-2 px-2 py-2">
+                            <div class="form-group">
+                                {{render_field(form.designer)}}
+                            </div>
+            
+                            <div class="form-group">
+                                {{render_field(form.client)}}
+                            </div>
+                    </div>
+                    <div class="input-group col-sm-12 col-md-6 col-lg-12 col-xl-12 mt-2 ml-2 mr-2 px-2 py-2">
+                        <div class="form-group">
+                            {{render_field(form.submit)}}
+                        </div>
+                    </div>
+                </div>
     </div>
 </form>
 

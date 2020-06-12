@@ -26,10 +26,13 @@ class EditForm(FlaskForm):
 
     choices = MultiCheckboxField('Routes', coerce=int)
 
-    movetto_field = fields.SelectField("Move to Designers Inv:", choices=[], validators=[validators.optional()])
+    movetto_field = fields.SelectField("Move to Designers Inventory:", choices=[], validators=[validators.optional()])
     
     client = fields.SelectField("Pick Client too:", choices=[], validators=[validators.optional()])
 
+    delete = fields.SubmitField("Delete Checked Items")
+
+    move = fields.SubmitField("Move to Chosen Inventory")
 
 class UserEditForm(FlaskForm):
 
