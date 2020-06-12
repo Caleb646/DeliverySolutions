@@ -136,7 +136,7 @@ def admin_edit():
     if form.validate_on_submit():
 
         if form.move.data:
-            print("moving")
+
             designer = form.designer.data
 
             client = form.client.data
@@ -164,132 +164,100 @@ def admin_edit():
     return render_template("admin/edit.html", form=form, dbkeys=userinv_keys)
 
 
-# @admin_bp.route("/admin/edit/<designer>", methods=("GET", "POST"), endpoint="fill_client_field")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("admin"))
-# def fill_client_field(designer):
+@admin_bp.route("/manage-users", methods=("GET", "POST"), endpoint="admin_manage_users")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_manage_users():
 
-#     js_Array = []
+    """This page diplays all the current users and allows for multiple operations to be done on their
+    info. """
 
-#     meta_data = db["Users"].find_one({"username": designer})
+    form = UserEditForm()
 
-#     client_list = meta_data["clients"]
+    user_list = User.find_all()
 
-#     for client in client_list:
+    editable_list = MetaOps.find_one(EDITABLE_FIELDS_METAKEY)
 
-#         js_Array.append(client)
+    form.choices.choices = user_list
 
-#     return jsonify({"clients": js_Array})
+    form.editable_fields.choices = [(field, field) for field in editable_list]
 
+    if form.validate_on_submit():
 
-# @admin_bp.route("/admin/manage-users", methods=("GET", "POST"), endpoint="admin_manage_users")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("admin"))
-# def admin_manage_users():
+        data = request.form.getlist("user-data")
 
-#     """This page diplays all the current users and allows for multiple operations to be done on their
-#     info. """
+        userid_list = strip_text(data, turnto_int=True)
 
-#     form = UserEditForm()
+        if len(userid_list) == 1:        
 
-#     user_list = list(db["Users"].find({}))
+            if form.remove_user.data:
 
-#     meta_list = db["MetaData"].find_one({"Name": "User Ids"})
+                User.remove_user(userid_list[0])
 
-#     editable_list = meta_list["Editable Fields"]
+                message = "User was Removed"
 
-#     form.choices.choices = [(row['_id'], (row["username"],
-#                                            row["email"],
-#                                            row["roles"])) for row in user_list]
+                return render_template("admin/manage_users.html", form=form, message=message)
 
-#     form.editable_fields.choices = [(field, field) for field in editable_list]
+            if form.change_user_info.data:
 
-#     first_message = "Select Only One User."
+                fieldto_edit = form.editable_fields.data
 
-#     title = "All Current Users"
+                newfield_val = form.change_to.data
 
-#     if form.validate_on_submit() and request.method == "POST":
+                update_single_field(userid_list, "_id", fieldto_edit,
+                                    newfield_val, db, array=False)
 
-#         data = request.form.getlist("user-data")
+                message = "User Info was Changed Successfully"
 
-#         if len(data) == 1:
+                return render_template("admin/manage_users.html", form=form, message=message, title=title)
 
-#             userid_list = strip_text(data, turnto_int=True)
+            if request.form["bsubmit"] == "Change Role To":
 
-#             if request.form["bsubmit"] == "Remove User":
+                new_role = form.roles.data
 
-#                 username = find_user(user_list, "username", userid_list)
+                update_single_field(userid_list, "_id", "roles", new_role, db, array=True)
 
-#                 remove_single_row(userid_list, "_id", db)
+                message = "Role Change was Successful"
 
-#                 remove_user("Designers", username, "MetaData", db, delfromArray=True)
+                return render_template("admin/manage_users.html", form=form, message=message, title=title)
 
-#                 remove_user("Designer", username, "AllInv", db)
+            if request.form["bsubmit"] == "Change Password":
 
-#                 message = "User was Removed"
+                if len(userid_list) > 0:
 
-#                 return render_template("admin/manage_users.html", form=form, message=message, title=title)
+                    return redirect(url_for(".admin_user_password", userid=userid_list[0]))
 
-#             if request.form["bsubmit"] == "Change User Info":
+                else:
 
-#                 fieldto_edit = form.editable_fields.data
+                    message = "Must Select a User before you can change their password!!"
 
-#                 newfield_val = form.change_to.data
+                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
 
-#                 update_single_field(userid_list, "_id", fieldto_edit,
-#                                     newfield_val, db, array=False)
+            if request.form["bsubmit"] == "Add Client":
 
-#                 message = "User Info was Changed Successfully"
+                new_client = form.add_client.data.upper()
 
-#                 return render_template("admin/manage_users.html", form=form, message=message, title=title)
+                if validate_client(userid_list, new_client, db):
 
-#             if request.form["bsubmit"] == "Change Role To":
+                    update_single_field(userid_list, "_id", "clients", new_client, db,
+                                        array=True, save_array=True)
 
-#                 new_role = form.roles.data
+                    message = "Client was Added Successfully"
 
-#                 update_single_field(userid_list, "_id", "roles", new_role, db, array=True)
+                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
 
-#                 message = "Role Change was Successful"
+                else:
 
-#                 return render_template("admin/manage_users.html", form=form, message=message, title=title)
+                    message = "Client Already Exists or Selected User does not have the role of user."
 
-#             if request.form["bsubmit"] == "Change Password":
+                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
+        else:
 
-#                 if len(userid_list) > 0:
+            form.choices.errors = "Select Only One User!!!"
 
-#                     return redirect(url_for(".admin_user_password", userid=userid_list[0]))
+            return render_template("admin/manage_users.html", form=form)
 
-#                 else:
-
-#                     message = "Must Select a User before you can change their password!!"
-
-#                     return render_template("admin/manage_users.html", form=form, message=message, title=title)
-
-#             if request.form["bsubmit"] == "Add Client":
-
-#                 new_client = form.add_client.data.upper()
-
-#                 if validate_client(userid_list, new_client, db):
-
-#                     update_single_field(userid_list, "_id", "clients", new_client, db,
-#                                         array=True, save_array=True)
-
-#                     message = "Client was Added Successfully"
-
-#                     return render_template("admin/manage_users.html", form=form, message=message, title=title)
-
-#                 else:
-
-#                     message = "Client Already Exists or Selected User does not have the role of user."
-
-#                     return render_template("admin/manage_users.html", form=form, message=message, title=title)
-#         else:
-
-#             form.choices.errors = "Select Only One User!!!"
-
-#             return render_template("admin/manage_users.html", form=form)
-
-#     return render_template("admin/manage_users.html", form=form, message=first_message, title=title, editable=editable_list)
+    return render_template("admin/manage_users.html", form=form, editable=editable_list, userkeys=user_keys)
 
 
 # @admin_bp.route("/admin/change-password/<userid>", methods=("GET", "POST"), endpoint="admin_user_password")

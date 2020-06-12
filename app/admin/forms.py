@@ -47,9 +47,19 @@ class UserEditForm(FlaskForm):
 
     editable_fields = fields.SelectField("Choose One Field to Change:", validators=[validators.optional()])
 
-    change_to = fields.StringField("Change Chosen Field To", validators=[validators.optional()])
+    change_to = fields.StringField("Change Chosen Field To:", validators=[validators.optional()])
 
-    add_client = fields.StringField("Change Field To", validators=[validators.optional()])
+    add_client = fields.StringField("Type Client's Name Below:", validators=[validators.optional()])
+
+    remove_user = fields.SubmitField("Remove User")
+
+    change_password = fields.SubmitField("Change Chosen User's Password")
+
+    change_user_info = fields.SubmitField("Change User Info")
+
+    change_role = fields.SubmitField("Change User's Role")
+
+    add_client_btn = fields.SubmitField("Add Client to Chosen User")
 
 
 class UserPasswordForm(FlaskForm):

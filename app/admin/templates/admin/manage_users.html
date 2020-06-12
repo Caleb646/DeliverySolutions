@@ -48,6 +48,7 @@
                 <div class="input-group col-sm-12 col-md-8 col-lg-8 col-xl-8 mt-4">
                     <form method="POST" action="">
                         {{ form.hidden_tag() }}
+                        {% from 'bootstrap/form.html' import render_field %}
                         <fieldset class="form-group">
                             <h4 class="text-white">{{message}}</h4>
                             <legend class="border-bottom mb-4 text-white">{{title}}</legend>
@@ -58,14 +59,36 @@
                                 {% endfor %}
                             </div>
                             {% endif %}
-                            {% for choice in form.choices.choices %}
-                                <div class="form-check text-white">
-                                    <input  class="form-check-input" type="checkbox" id="defaultCheck1" name="user-data" value={{choice[0]}}>
-                                    <label class="form-check-label" for="defaultCheck1">
-                                    {{choice[1]}}
-                                    </label>
+
+                <div class="container">
+                    <div class="row text-white">
+                        <div class="input-group col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                            <table class="table text-white">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">User Id</th>
+                                        <th scope="col">Roles</th>
+                                        <th scope="col">Email</th>
+                                    </tr>
+                                </thead>
+                                        {% for choice in form.choices.choices %}
+
+                                            <div class="form-check text-white">
+                                                <tbody>
+                                                <tr>
+                                               <th><input  class="form-check-input" type="checkbox" id="defaultCheck1" name="user-data" value= {{choice.get(userkeys[0])}}></th> 
+                                                <td>{{choice.get(userkeys[0])}}</td>
+                                               <td>{{choice.get(userkeys[1])}}</td>
+                                                <td>{{choice.get(userkeys[3])}}</td>
+                                                <td>{{choice.get(userkeys[4])}}</td>
+                                            </div>
+                                        </tr>
+                                    </tbody>
                                 </div>
-                            {% endfor %}
+                                    {% endfor %}
+                                </div>
+                                </table>
                         </fieldset>
                     </div>
                     <div class="input-group col-sm-12 col-md-12 col-lg-12 col-xl-12 mt-4">
@@ -85,38 +108,46 @@
                     <div class="container">
 
                     <div class="row text-white">
-                        <div class="input-group col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4">
+                        <div class="input-group col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4 ">
                             <h4>Edit/Remove User</h4>
-                            <p>
-                            <button type="submit" class="btn btn-secondary btn-md" name="bsubmit" value="Remove User">Remove User</button>
-                            <button type="submit" class="btn btn-secondary btn-md" name="bsubmit" value="Change Password">Change Password</button>
-                            </p>
+                            <div class="input-group">
+                                {{render_field(form.remove_user)}}
+                            
+                            <div class="input-group-append">
+                                {{render_field(form.change_password)}}
+                            </div>
+                        </div>
+                            
                         </div>
                             <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4">
                                 <h4>Change User Fields</h4>
-                                    <div class="input-group mb-3">
-                                        {{form.editable_fields}}
-                                        {{form.change_to}}
-                                        <div class="input-group-append">
-                                          <button class="btn btn-secondary" type="submit" name="bsubmit" value="Change User Info">Submit</button>
-                                        </div>
+                                        <div class="input-group">
+                                            {{render_field(form.editable_fields)}}
+                                            
+                                            <div class="input-group-append">
+                                                {{render_field(form.change_to)}}
+                                            </div>
+                                            <div class="input-group-append">
+                                                {{render_field(form.change_user_info)}}
+                                            </div>
+                                        
                                     </div>
                                 </div>
                                 <div class="input-group col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4">
                                     <h4>Change User Roles</h4>
                                     <div class="input-group mb-3">
-                                        {{form.roles}}
+                                        {{render_field(form.roles)}}
                                         <div class="input-group-append">
-                                          <button class="btn btn-secondary" type="submit" name="bsubmit" value="Change Role To">Submit</button>
+                                          {{render_field(form.change_role)}}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="input-group col-sm-12 col-md-6 col-lg-4 col-xl-4 mt-4">
                                     <h4>Add Client</h4>
                                     <div class="input-group mb-3">
-                                        {{form.add_client}}
+                                        {{render_field(form.add_client)}}
                                         <div class="input-group-append">
-                                          <button class="btn btn-secondary" type="submit" name="bsubmit" value="Change Role To">Submit</button>
+                                          {{render_field(form.add_client_btn)}}
                                         </div>
                                     </div>
                                 </div>

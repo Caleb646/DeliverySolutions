@@ -71,7 +71,7 @@ class AllInvOps:
 
         """Deletes a list of db entries in a batch"""
 
-        db[ALL_INV_COLLECTION].remove({keytodel: {"$in": data}})
+        db[ALL_INV_COLLECTION].delete_many({keytodel: {"$in": data}})
 
 
     @staticmethod
@@ -119,6 +119,60 @@ class User(UserMixin):
         self.password = password
         self.roles = roles
         self._id = _id
+
+    @staticmethod
+    def remove_user(user_id=None, username=None):
+
+        if user_id:
+
+            user = User.find_user(userid_val=user_id, userid=True)
+
+            username = user[USERNAME_USERKEY]
+
+            isdesigner = user.get(CLIENT_USERINVKEY)
+
+            if isdesigner != None:
+
+                db[USER_COLLECTION].delete_one({USER_ID_USERKEY:user_id})
+            
+            else:
+
+                db[USER_COLLECTION].delete_one({USER_ID_USERKEY:user_id})
+
+                db[ALL_INV_COLLECTION].delete_many({USERNAME_USERKEY:username})
+
+                db[META_COLLECTION].update({META_ID_KEY:META_ID_VALUE},
+                    {"$pull": {DESIGNERS_METAKEY: {"$in":[username]}}})
+
+        else:
+
+            user = User.find_user(username_val=username)
+
+            username = user[USERNAME_USERKEY]
+
+            isdesigner = user.get(CLIENT_USERINVKEY)
+
+            if isdesigner != None:
+
+                db[USER_COLLECTION].delete_one({USER_ID_USERKEY:user_id})
+            
+            else:
+
+                db[USER_COLLECTION].delete_one({USER_ID_USERKEY:user_id})
+
+                db[ALL_INV_COLLECTION].delete_many({USERNAME_USERKEY:username})
+
+                db[META_COLLECTION].update({META_ID_KEY:META_ID_VALUE},
+                    {"$pull": {DESIGNERS_METAKEY: {"$in":[username]}}})
+
+
+
+    @staticmethod
+    def find_all():
+
+        user_list = list(db[USER_COLLECTION].find({}))
+
+        return user_list
 
     
     @staticmethod
