@@ -66,6 +66,36 @@ class AllInvOps:
 
             return db_data
 
+    @staticmethod
+    def delete_all(data: list, keytodel=None) -> None:
+
+        """Deletes a list of db entries in a batch"""
+
+        db[ALL_INV_COLLECTION].remove({keytodel: {"$in": data}})
+
+
+    @staticmethod
+    def update_all(data: list, update_keys: tuple, update_vals: tuple, mainkey: str = None) -> None:
+
+        """Updates multiple db entries with one db call"""
+
+        set_dict: dict = {}
+
+        if len(update_keys) > 1:
+
+            for i in range(len(update_keys)):
+
+                set_dict[update_keys[i]] = update_vals[i]
+
+        else:
+
+            set_dict[update_keys[0]] = update_vals[0]
+
+        db[ALL_INV_COLLECTION].update_many({mainkey: {"$in" : data}},
+        {"$set": set_dict})
+
+        set_dict.clear()
+
 
 class MetaOps:
 
@@ -109,7 +139,6 @@ class User(UserMixin):
                 return user
         
         else:
-
             user = db[USER_COLLECTION].find_one({USER_ID_USERKEY:userid_val})
 
             if retval != None and user != None:
@@ -198,7 +227,7 @@ def init_db():
             designer = designer_list[i]
             inv_data = []
             DB = db[ALL_INV_COLLECTION]
-            start_ind = i*inv_size
+            start_ind = (i*inv_size) + 1
 
             for j in range(start_ind, inv_size+start_ind):
 

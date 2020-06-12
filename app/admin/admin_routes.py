@@ -122,32 +122,22 @@ def admin_edit():
     """"""
 
     json_data = json.loads(request.args["data"])
-    print("\n\n in Admin Edit \n\n")
     db_data = AllInvOps.find_all(json_data)
-
-    print(db_data)
-
-    #database_data, title= database_search(search_data, db)
-    #formatted_data = formatter(database_data)
 
     form = EditForm()
     form.choices.choices = db_data
 
     designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
-    # meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
-    # designer_list = meta_data["Designers"]
-    form.movetto_field.choices = [(designer, designer) for designer in designer_list]
+    form.designer.choices = [(designer, designer) for designer in designer_list]
     
     client_list = User.find_user(username_val=designer_list[0], retval=USER_CLIENT_USERKEY)
-    # client_data = db["Users"].find_one({"username": designer_list[0]})
-    # client_list = client_data["clients"]
     form.client.choices = [(client, client) for client in client_list]
 
     if form.validate_on_submit():
 
-        if request.form["bsubmit"] == "Move To":
-
-            designer = form.movetto_field.data
+        if form.move.data:
+            print("moving")
+            designer = form.designer.data
 
             client = form.client.data
 
@@ -155,17 +145,19 @@ def admin_edit():
 
             tagnum_list = strip_text(data, turnto_int=True)
 
-            moveby_tagnum(designer, client, tagnum_list, db)
+            AllInvOps.update_all(tagnum_list, mainkey=TAG_NUM_USERINVKEY,
+            update_keys=(DESIGNER_USERINVKEY, CLIENT_USERINVKEY), 
+            update_vals=(designer, client))
 
             return redirect(url_for("admin.admin_search"))
 
-        if request.form["bsubmit"] == "Delete":
+        if form.delete.data:
 
             data = request.form.getlist("inv-data")
 
             tagnum_list = strip_text(data, turnto_int=True)
 
-            deleteby_tagnum(tagnum_list, db)
+            AllInvOps.delete_all(tagnum_list, keytodel=TAG_NUM_USERINVKEY)
 
             return redirect(url_for("admin.admin_search"))
 

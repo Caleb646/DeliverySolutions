@@ -2,9 +2,9 @@
 
 let designer_select = document.getElementById("designer");
             let client_select = document.getElementById("client");
+            
             designer_select.onchange = function() {
-                designer = designer_select.value;
-
+                let designer = designer_select.value;
                 fetch("/admin/search/" + designer).then(function(response) {
                    response.json().then(function(data) {
 

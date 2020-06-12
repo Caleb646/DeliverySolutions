@@ -15,6 +15,7 @@ class SearchForm(FlaskForm):
 
     submit = fields.SubmitField("Submit")
 
+
 class MultiCheckboxField(SelectMultipleField):
 
     widget = widgets.ListWidget(prefix_label=False)
@@ -24,15 +25,16 @@ class MultiCheckboxField(SelectMultipleField):
 
 class EditForm(FlaskForm):
 
-    choices = MultiCheckboxField('Routes', coerce=int)
+    choices = MultiCheckboxField('Routes')
 
-    movetto_field = fields.SelectField("Move to Designers Inventory:", choices=[], validators=[validators.optional()])
+    designer = fields.SelectField("Move to Designers Inventory:", choices=[], validators=[validators.optional(), validators.NoneOf((None, "EMPTY"))])
     
-    client = fields.SelectField("Pick Client too:", choices=[], validators=[validators.optional()])
+    client = fields.SelectField("Pick Client too:", choices=[], validators=[validators.optional(), validators.NoneOf((None, "EMPTY"))])
 
     delete = fields.SubmitField("Delete Checked Items")
 
     move = fields.SubmitField("Move to Chosen Inventory")
+
 
 class UserEditForm(FlaskForm):
 
