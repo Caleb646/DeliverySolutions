@@ -50,8 +50,8 @@
                         {{ form.hidden_tag() }}
                         {% from 'bootstrap/form.html' import render_field %}
                         <fieldset class="form-group">
-                            <h4 class="text-white">{{message}}</h4>
-                            <legend class="border-bottom mb-4 text-white">{{title}}</legend>
+                            <h2 class="text-white">{{message}}</h2>
+                            <legend class="border-bottom mb-4 text-white">Current Users</legend>
                             {% if form.choices.errors %}
                             <div class="invalid-feedback">
                                 {% for error in form.choices.errors %}
@@ -68,6 +68,7 @@
                                     <tr>
                                         <th scope="col">#</th>
                                         <th scope="col">User Id</th>
+                                        <th scope="col">Username</th>
                                         <th scope="col">Roles</th>
                                         <th scope="col">Email</th>
                                     </tr>

@@ -146,7 +146,7 @@ def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, 
 
 def validate_password(pass_to_validate, current_user, db):
 
-    currentuser_password = User
+    currentuser_password = None
 
     current_user_data = db["Users"].find_one({"username": current_user.username})
 

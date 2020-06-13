@@ -68,7 +68,6 @@ class UserPasswordForm(FlaskForm):
 
     new_user_password = fields.StringField("New User Password", validators=[validators.required()])
 
-
 class CreateWorker(FlaskForm):
 
     username = fields.StringField("Enter Username", validators=[validators.required()])

@@ -185,11 +185,13 @@ def admin_manage_users():
 
         data = request.form.getlist("user-data")
 
-        userid_list: list = strip_text(data, turnto_int=True)
+        print(f"data: {data}")
 
-        user_id: int = userid_list[0]
+        user_id: int = int(data[0])
 
-        if len(userid_list) == 1:        
+        print(f"user id: {user_id}")
+
+        if len(data) == 1:        
 
             if form.remove_user.data:
 
@@ -197,7 +199,7 @@ def admin_manage_users():
 
                 message = "User was Removed"
 
-                return render_template("admin/manage_users.html", form=form, message=message)
+                return render_template("admin/manage_users.html", form=form, message=message, userkeys=user_keys)
 
             if form.change_user_info.data:
 
@@ -209,7 +211,7 @@ def admin_manage_users():
 
                 message = "User Info was Changed Successfully"
 
-                return render_template("admin/manage_users.html", form=form, message=message)
+                return render_template("admin/manage_users.html", form=form, message=message, userkeys=user_keys)
 
             if form.change_role.data:
 
@@ -219,19 +221,11 @@ def admin_manage_users():
 
                 message = "Role Change was Successful"
 
-                return render_template("admin/manage_users.html", form=form, message=message)
+                return render_template("admin/manage_users.html", form=form, message=message, userkeys=user_keys)
 
             if form.change_password.data:
 
-                if len(userid_list) > 0:
-
-                    return redirect(url_for("admin.admin_user_password", userid=user_id))
-
-                else:
-
-                    message = "Must Select a User before you can change their password!!"
-
-                    return render_template("admin/manage_users.html", form=form, message=message)
+                return redirect(url_for("admin.admin_user_password", userid=user_id))
 
             if form.add_client_btn.data:
 
@@ -241,18 +235,18 @@ def admin_manage_users():
 
                     message = "Client was Added Successfully"
 
-                    return render_template("admin/manage_users.html", form=form, message=message)
+                    return render_template("admin/manage_users.html", form=form, message=message, userkeys=user_keys)
 
                 else:
 
                     message = "Client Already Exists or Selected User does not have the role of user."
 
-                    return render_template("admin/manage_users.html", form=form, message=message)
+                    return render_template("admin/manage_users.html", form=form, message=message, userkeys=user_keys)
         else:
 
-            form.choices.errors = "Select Only One User!!!"
+            message = "Select Only One User!!!"
 
-            return render_template("admin/manage_users.html", form=form)
+            return render_template("admin/manage_users.html", form=form, message=message, userkeys=user_keys)
 
     return render_template("admin/manage_users.html", form=form, editable=editable_list, userkeys=user_keys)
 
@@ -274,7 +268,7 @@ def admin_user_password(userid):
 
         if User.check_pass(currentuser_password, admin_password):
 
-            User.update_array((USER_PASSWORD_USERKEY, new_user_password), user_id=userid)
+            User.update_val((USER_PASSWORD_USERKEY, new_user_password), user_id=userid)
 
             return redirect(url_for("admin.admin_manage_users"))
 
@@ -287,7 +281,7 @@ def admin_user_password(userid):
     return render_template("admin/change-user-password.html", form=form)
 
 
-@admin_bp.route("/admin/create-worker", methods=("GET", "POST"), endpoint="admin_create_worker")
+@admin_bp.route("/create-worker", methods=("GET", "POST"), endpoint="admin_create_worker")
 @login_required
 @user_has_role(user=current_user, required_roles=("admin"))
 def admin_create_worker():
@@ -298,7 +292,7 @@ def admin_create_worker():
 
         username = form.username.data
 
-        if validate_username(username, db):
+        if User.find_user(username_val=username) == None:
 
             password = form.password.data
 
@@ -306,7 +300,7 @@ def admin_create_worker():
 
             role = form.roles.data
 
-            create_worker(username, password, email, role, db)
+            User.create_worker(username, password, email, role)
 
             message = "Worker Created Successfully."
 

@@ -105,6 +105,12 @@ class MetaOps:
 
         return ret[keyto_find]
 
+    @staticmethod
+    def update_val(newvalue, key):
+
+        db[META_COLLECTION].update_one({META_ID_KEY:META_ID_VALUE},
+                {"$set":{key:newvalue}})
+
 
 class User(UserMixin):
 
@@ -118,6 +124,22 @@ class User(UserMixin):
         self.password = password
         self.roles = roles
         self._id = _id
+
+    @staticmethod
+    def create_worker(username, password, email, role):
+
+        current_user_ids = MetaOps.find_one(USER_ID_METAKEY)
+
+        hash_pass = generate_password_hash(password)
+
+        db[USER_COLLECTION].insert_one({USER_ID_USERKEY:current_user_ids,
+        USERNAME_USERKEY:username, USER_EMAIL_USERKEY:email,
+        USER_PASSWORD_USERKEY:hash_pass, USER_ROLES_USERKEY:role})
+
+        current_user_ids += 1
+
+        MetaOps.update_val(current_user_ids, USER_ID_METAKEY)
+
 
     @staticmethod
     def remove_user(user_id=None, username=None) -> None:
@@ -199,6 +221,21 @@ class User(UserMixin):
 
                 return False
 
+    @staticmethod
+    def update_val(update_setup: tuple, user_id=None, user_name=None) -> None:
+
+        key = update_setup[0]
+        val = update_setup[1]
+        
+        if user_name:
+
+            db[USER_COLLECTION].update_one({USERNAME_USERKEY:user_name},
+            {"$set":{key:val}})
+
+        else:
+
+            db[USER_COLLECTION].update_one({USER_ID_USERKEY:user_id},
+            {"$set":{key:val}})
 
 
     @staticmethod
