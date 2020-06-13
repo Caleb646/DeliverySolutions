@@ -97,8 +97,8 @@ class CreateUser(FlaskForm):
 
 class StorageFees(FlaskForm):
 
-    designers = fields.SelectField("Designer:", choices=[], validators=[validators.required()])
+    designer = fields.SelectField("Designer:", choices=[], validators=[validators.required()])
 
-    clients = fields.SelectField("Clients:", choices=[], validators=[validators.optional()])
+    client = fields.SelectField("Client:", choices=[], validators=[validators.optional()])
 
     submit = fields.SubmitField()

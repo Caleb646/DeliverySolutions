@@ -355,58 +355,50 @@ def admin_create_user():
     return render_template("/admin/create-user.html", form=form, message=message)
 
 
-# @admin_bp.route("/admin/storage-fees", methods=("GET", "POST"), endpoint="admin_storage_fees")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("admin"))
-# def admin_storage_fees():
+@admin_bp.route("/storage-fees", methods=("GET", "POST"), endpoint="admin_storage_fees")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_storage_fees():
 
-#     meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
+    designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
 
-#     designer_list = meta_data["Designers"]
+    form = StorageFees()
 
-#     form = StorageFees()
+    form.designer.choices = [(designer, designer) for designer in designer_list]
 
-#     form.designers.choices = [(designer, designer) for designer in designer_list]
+    client_list = User.find_user(username_val=designer_list[0], retval=USER_CLIENT_USERKEY)
 
-#     client_data = db["Users"].find_one({"username": designer_list[0]})
+    client_list.insert(0, NULLVALUE[0])
 
-#     client_list = client_data['clients']
+    form.client.choices = [(client, client) for client in client_list]
 
-#     client_list.insert(0, "None")
+    if form.validate_on_submit():
 
-#     form.clients.choices = [(client, client) for client in client_list]
+        designer = form.designer.data
 
-#     if form.validate_on_submit():
+        client = form.client.data
 
-#         designer = form.designers.data
+        findsearch_key = search_method({DESIGNER_USERINVKEY: designer, CLIENT_USERINVKEY: client})
 
-#         client = form.clients.data
+        data = json.dumps(findsearch_key)
 
-#         data = json.dumps({"Designer": designer, "Client": client})
+        return redirect(url_for("admin.admin_show_fees", data=data))
 
-#         return redirect(url_for(".admin_show_fees", data=data))
-
-#     return render_template("admin/storage-fees.html", form=form)
+    return render_template("admin/storage-fees.html", form=form)
 
 
-# @admin_bp.route("/admin/show-fees", methods=("GET", "POST"), endpoint="admin_show_fees")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("admin"))
-# def admin_show_fees():
+@admin_bp.route("/show-fees", methods=("GET", "POST"), endpoint="admin_show_fees")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_show_fees():
 
-#     json_data = request.args["data"]
+    json_data = request.args["data"]
 
-#     search_data = json.loads(json_data)
+    search_data = json.loads(json_data)
 
+    db_data = AllInvOps.find_all(search_data)
 
-#     db_data, title = database_search(search_data, db)
+    show_data = db_data
 
-#     title = "Current Storage Fees for " + title
-
-
-#     show_data = [(row["_id"], row["Designer"], row["Client"], row['Date Entered'],
-#                   row["Storage Fees"])
-#                   for row in db_data]
-
-#     return render_template("admin/show-fees.html", data=show_data, title=title)
+    return render_template("admin/show-fees.html", data=show_data, dbkeys=userinv_keys)
 

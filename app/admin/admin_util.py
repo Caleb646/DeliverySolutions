@@ -11,10 +11,10 @@ def search_method(data_dict: dict) -> dict:
 
     """Returns the dictionary with an added Search key for admin_edit to use"""
 
-    designerVal = data_dict[DESIGNER_USERINVKEY]
-    clientVal = data_dict[CLIENT_USERINVKEY]
-    tagnumVal = data_dict[TAG_NUM_USERINVKEY]
-    shipmentnumVal = data_dict[SHIPMENT_NUM_USERINVKEY]
+    designerVal = data_dict.get(DESIGNER_USERINVKEY)
+    clientVal = data_dict.get(CLIENT_USERINVKEY)
+    tagnumVal = data_dict.get(TAG_NUM_USERINVKEY)
+    shipmentnumVal = data_dict.get(SHIPMENT_NUM_USERINVKEY)
 
     print(designerVal, clientVal, tagnumVal, shipmentnumVal)
 

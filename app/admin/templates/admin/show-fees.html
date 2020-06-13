@@ -47,7 +47,7 @@
                 
                 <fieldset class="form-group">
                     <b>{{message}}</b>
-                    <legend class="border-bottom mb-4">{{title}}</legend>
+                    <legend class="border-bottom mb-4">Current Storage Fees</legend>
                     <table class="table text-white">
                         <thead>
                         <tr>
@@ -56,6 +56,7 @@
                             <th scope="col">Designer Name</th>
                             <th scope="col">Client Name</th>
                             <th scope="col">Date Entered</th>
+                            <th scope="col">Storage Fees</th>
                             <th scope="col">Unpaid Storage</th>
                         </tr>
                         </thead>
@@ -64,12 +65,17 @@
                 <div class="form-check text-white">  
                         <tbody>
                             <tr>
-                            <th scope="row"> <input  class="form-check-input" type="checkbox" id="defaultCheck1" name="inv-data" value={{choice[0]}}></th>
-                            <td>{{choice[0]}}</td>
-                            <td>{{choice[1]}}</td>
-                            <td>{{choice[2]}}</td>
-                            <td>{{choice[3]}}</td>
-                            <td>{{choice[4]}}</td>
+                            <th scope="row"> <input  class="form-check-input" type="checkbox" id="defaultCheck1" name="inv-data" value={{choice.get(dbkeys[0])}}></th>
+                            <td>{{choice.get(dbkeys[0])}}</td>
+                            
+                            <td>{{choice.get(dbkeys[2])}}</td>
+                            <td>{{choice.get(dbkeys[3])}}</td>
+                           
+                            <td>{{choice.get(dbkeys[5])}}</td>
+                            
+                            <td>{{choice.get(dbkeys[9])}}</td>
+                            <td>{{choice.get(dbkeys[10])}}</td>
+                            
                             </tr>
                         </tbody>
                 
