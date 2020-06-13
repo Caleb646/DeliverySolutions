@@ -288,6 +288,8 @@ def admin_create_worker():
 
     form = CreateWorker()
 
+    message = None
+
     if form.validate_on_submit():
 
         username = form.username.data
@@ -312,47 +314,45 @@ def admin_create_worker():
 
             return render_template("admin/create-worker.html", form=form, message=message)
 
-    return render_template("admin/create-worker.html", form=form)
+    return render_template("admin/create-worker.html", form=form, message=message)
 
 
-# @admin_bp.route("/admin/create-user", methods=("GET", "POST"), endpoint="admin_create_user")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("admin"))
-# def admin_create_user():
+@admin_bp.route("/create-user", methods=("GET", "POST"), endpoint="admin_create_user")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_create_user():
 
-#     form = CreateUser()
+    form = CreateUser()
 
-#     title = "Create a New User"
+    message = None
 
-#     message = "If there are multiple known clients, separate each one with a comma."
+    if form.validate_on_submit():
 
-#     if form.validate_on_submit():
+        username = form.username.data
 
-#         username = form.username.data
+        if User.find_user(username_val=username) == None:
 
-#         if validate_username(username, db):
+            password = form.password.data
 
-#             password = form.password.data
+            email = form.email.data
 
-#             email = form.email.data
+            clients = form.known_clients.data
 
-#             clients = form.known_clients.data
+            client_list = clients.strip().upper().split(",")
 
-#             client_list = clients.strip().upper().split(",")
+            User.create_user(username, password, email, client_list)
 
-#             create_user(username, password, email, client_list, db)
+            message = "User was Successfully Created."
 
-#             message = "User was Successfully Created."
+            return render_template("/admin/create-user.html", form=form, message=message)
 
-#             return render_template("/admin/create-user.html", form=form, message=message, title=title)
+        else:
 
-#         else:
+            message = "Username Already Exists."
 
-#             message = "Username Already Exists."
+            return render_template("/admin/create-user.html", form=form, message=message)
 
-#             return render_template("/admin/create-user.html", form=form, message=message, title=title)
-
-#     return render_template("/admin/create-user.html", form=form, title=title, message=message)
+    return render_template("/admin/create-user.html", form=form, message=message)
 
 
 # @admin_bp.route("/admin/storage-fees", methods=("GET", "POST"), endpoint="admin_storage_fees")

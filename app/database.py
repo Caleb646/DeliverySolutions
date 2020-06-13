@@ -126,6 +126,22 @@ class User(UserMixin):
         self._id = _id
 
     @staticmethod
+    def create_user(username, password, email, client_list):
+
+        current_user_ids = MetaOps.find_one(USER_ID_METAKEY)
+
+        hash_pass = generate_password_hash(password)
+
+        db[USER_COLLECTION].insert_one({USER_ID_USERKEY:current_user_ids,
+        USERNAME_USERKEY:username, USER_EMAIL_USERKEY:email,
+        USER_PASSWORD_USERKEY:hash_pass, USER_ROLES_USERKEY:[ "user" ],
+        USER_CLIENT_USERKEY:client_list})
+
+        current_user_ids += 1
+
+        MetaOps.update_val(current_user_ids, USER_ID_METAKEY)
+
+    @staticmethod
     def create_worker(username, password, email, role):
 
         current_user_ids = MetaOps.find_one(USER_ID_METAKEY)

@@ -45,9 +45,10 @@
         <div class="container text-white">
             <form method="POST" action="">
                 {{ form.hidden_tag() }}
+                {% from 'bootstrap/form.html' import render_field %}
                 <fieldset class="form-group">
-                    <b>{{message}}</b>
-                    <legend class="border-bottom mb-4">{{title}}</legend>
+                    <h2>{{message}}</h2>
+                    <legend class="border-bottom mb-4">Create a New User</legend>
                     {% if form.username.errors %}
                     <div class="invalid-feedback">
                         {% for error in form.username.errors %}
@@ -81,28 +82,19 @@
 
             <div class="container">
                 <div class="row text-white">
-                    <div class="input-group col-sm-12 col-md-6 col-lg-12 col-xl-12 mt-2 ml-2 mr-2 px-2 py-2"></div>
+                    <div class="input-group col-sm-12 col-md-12 col-lg-12 col-xl-12"></div>
+                        
                         <div class="form-group">
-                            <label for="exampleInputEmail1">Username</label>
-                            {{form.username}}
-                        </div>
-
-                        <div class="form-group">
-                            <label for="exampleInputPassword1">Password</label>
-                            {{form.password}}
-                        </div>
-
-                        <div class="form-group">
-                            <label for="exampleInputPassword1">Email</label>
-                            {{form.email}}
-                        </div>
-
-                        <div class="form-group">
-                            <label for="exampleInputPassword1">Known Clients</label>
-                            {{form.known_clients}}
-                        </div>
-
-                        <button type="submit" class="btn btn-secondary">Submit</button>
+                            <h2>Instructions</h2>
+                            <p class="lead">
+                                Make sure to separate each client's name with a comma.
+                            </p>
+                            {{render_field(form.username)}}
+                            {{render_field(form.password)}}
+                            {{render_field(form.email)}}
+                            {{render_field(form.known_clients)}}
+                            <button type="submit" class="btn btn-secondary">Submit</button>
+                        </div>                       
                     </div>
                 </div>
             </div>
