@@ -7,7 +7,6 @@ from app.admin.admin_util import search_method
 from app.global_util import user_has_role, strip_text
 from app.constants import meta_keys, user_keys,\
      userinv_keys, SEARCH_KEY, NULLVALUE
-#from app import bootstrap
 
 #Meta collection keys
 SHIPMENT_NUM_METAKEY = meta_keys[2]
@@ -186,13 +185,15 @@ def admin_manage_users():
 
         data = request.form.getlist("user-data")
 
-        userid_list = strip_text(data, turnto_int=True)
+        userid_list: list = strip_text(data, turnto_int=True)
+
+        user_id: int = userid_list[0]
 
         if len(userid_list) == 1:        
 
             if form.remove_user.data:
 
-                User.remove_user(userid_list[0])
+                User.remove_user(user_id)
 
                 message = "User was Removed"
 
@@ -200,57 +201,53 @@ def admin_manage_users():
 
             if form.change_user_info.data:
 
-                fieldto_edit = form.editable_fields.data
+                fieldto_edit: str = form.editable_fields.data
 
-                newfield_val = form.change_to.data
+                newfield_val: str = form.change_to.data
 
-                update_single_field(userid_list, "_id", fieldto_edit,
-                                    newfield_val, db, array=False)
+                User.update_array((fieldto_edit, newfield_val), user_id=user_id)
 
                 message = "User Info was Changed Successfully"
 
-                return render_template("admin/manage_users.html", form=form, message=message, title=title)
+                return render_template("admin/manage_users.html", form=form, message=message)
 
-            if request.form["bsubmit"] == "Change Role To":
+            if form.change_role.data:
 
                 new_role = form.roles.data
 
-                update_single_field(userid_list, "_id", "roles", new_role, db, array=True)
+                User.update_array((USER_ROLES_USERKEY, new_role), user_id=user_id)
 
                 message = "Role Change was Successful"
 
-                return render_template("admin/manage_users.html", form=form, message=message, title=title)
+                return render_template("admin/manage_users.html", form=form, message=message)
 
-            if request.form["bsubmit"] == "Change Password":
+            if form.change_password.data:
 
                 if len(userid_list) > 0:
 
-                    return redirect(url_for(".admin_user_password", userid=userid_list[0]))
+                    return redirect(url_for("admin.admin_user_password", userid=user_id))
 
                 else:
 
                     message = "Must Select a User before you can change their password!!"
 
-                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
+                    return render_template("admin/manage_users.html", form=form, message=message)
 
-            if request.form["bsubmit"] == "Add Client":
+            if form.add_client_btn.data:
 
-                new_client = form.add_client.data.upper()
+                new_client: str = strip_text(form.add_client.data.upper(), toStr=True)
 
-                if validate_client(userid_list, new_client, db):
-
-                    update_single_field(userid_list, "_id", "clients", new_client, db,
-                                        array=True, save_array=True)
+                if User.add_client(new_client, user_id=user_id):
 
                     message = "Client was Added Successfully"
 
-                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
+                    return render_template("admin/manage_users.html", form=form, message=message)
 
                 else:
 
                     message = "Client Already Exists or Selected User does not have the role of user."
 
-                    return render_template("admin/manage_users.html", form=form, message=message, title=title)
+                    return render_template("admin/manage_users.html", form=form, message=message)
         else:
 
             form.choices.errors = "Select Only One User!!!"
@@ -260,66 +257,68 @@ def admin_manage_users():
     return render_template("admin/manage_users.html", form=form, editable=editable_list, userkeys=user_keys)
 
 
-# @admin_bp.route("/admin/change-password/<userid>", methods=("GET", "POST"), endpoint="admin_user_password")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("admin"))
-# def admin_user_password(userid):
+@admin_bp.route("/change-password/<userid>", methods=("GET", "POST"), endpoint="admin_user_password")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_user_password(userid):
 
-#     form = UserPasswordForm()
+    form = UserPasswordForm()
 
-#     if form.validate_on_submit():
+    if form.validate_on_submit():
 
-#         admin_password = form.admin_password.data
+        admin_password = form.admin_password.data
 
-#         new_user_password = form.new_user_password.data
+        new_user_password = form.new_user_password.data
 
-#         if validate_password(admin_password, current_user, db):
+        currentuser_password: str = User.find_user(username_val=current_user.username, retval=USER_PASSWORD_USERKEY)
 
-#             change_password(userid, new_user_password, db)
+        if User.check_pass(currentuser_password, admin_password):
 
-#             return redirect(url_for(".admin_manage_users"))
+            User.update_array((USER_PASSWORD_USERKEY, new_user_password), user_id=userid)
 
-#         else:
+            return redirect(url_for("admin.admin_manage_users"))
 
-#             form.admin_password.errors = "Current Admin Password was incorrect!!!"
+        else:
 
-#             return render_template("admin/change-user-password.html", form=form)
+            form.admin_password.errors = "Current Admin Password was incorrect!!!"
 
-#     return render_template("admin/change-user-password.html", form=form)
+            return render_template("admin/change-user-password.html", form=form)
+
+    return render_template("admin/change-user-password.html", form=form)
 
 
-# @admin_bp.route("/admin/create-worker", methods=("GET", "POST"), endpoint="admin_create_worker")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("admin"))
-# def admin_create_worker():
+@admin_bp.route("/admin/create-worker", methods=("GET", "POST"), endpoint="admin_create_worker")
+@login_required
+@user_has_role(user=current_user, required_roles=("admin"))
+def admin_create_worker():
 
-#     form = CreateWorker()
+    form = CreateWorker()
 
-#     if form.validate_on_submit():
+    if form.validate_on_submit():
 
-#         username = form.username.data
+        username = form.username.data
 
-#         if validate_username(username, db):
+        if validate_username(username, db):
 
-#             password = form.password.data
+            password = form.password.data
 
-#             email = form.email.data
+            email = form.email.data
 
-#             role = form.roles.data
+            role = form.roles.data
 
-#             create_worker(username, password, email, role, db)
+            create_worker(username, password, email, role, db)
 
-#             message = "Worker Created Successfully."
+            message = "Worker Created Successfully."
 
-#             return render_template("admin/create-worker.html", form=form, message=message)
+            return render_template("admin/create-worker.html", form=form, message=message)
 
-#         else:
+        else:
 
-#             message = "Username Already Exists."
+            message = "Username Already Exists."
 
-#             return render_template("admin/create-worker.html", form=form, message=message)
+            return render_template("admin/create-worker.html", form=form, message=message)
 
-#     return render_template("admin/create-worker.html", form=form)
+    return render_template("admin/create-worker.html", form=form)
 
 
 # @admin_bp.route("/admin/create-user", methods=("GET", "POST"), endpoint="admin_create_user")

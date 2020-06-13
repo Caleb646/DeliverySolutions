@@ -42,7 +42,6 @@ LOCATION_USERINVKEY = userinv_keys[8]
 STORAGE_FEES_USERINVKEY = userinv_keys[9]
 PAID_LAST_USERINVKEY = userinv_keys[10]
 
-
 class AllInvOps:
 
     @staticmethod
@@ -121,7 +120,7 @@ class User(UserMixin):
         self._id = _id
 
     @staticmethod
-    def remove_user(user_id=None, username=None):
+    def remove_user(user_id=None, username=None) -> None:
 
         if user_id:
 
@@ -139,9 +138,9 @@ class User(UserMixin):
 
                 db[USER_COLLECTION].delete_one({USER_ID_USERKEY:user_id})
 
-                db[ALL_INV_COLLECTION].delete_many({USERNAME_USERKEY:username})
+                db[ALL_INV_COLLECTION].delete_many({DESIGNER_USERINVKEY:username})
 
-                db[META_COLLECTION].update({META_ID_KEY:META_ID_VALUE},
+                db[META_COLLECTION].update_one({META_ID_KEY:META_ID_VALUE},
                     {"$pull": {DESIGNERS_METAKEY: {"$in":[username]}}})
 
         else:
@@ -160,11 +159,79 @@ class User(UserMixin):
 
                 db[USER_COLLECTION].delete_one({USER_ID_USERKEY:user_id})
 
-                db[ALL_INV_COLLECTION].delete_many({USERNAME_USERKEY:username})
-
-                db[META_COLLECTION].update({META_ID_KEY:META_ID_VALUE},
+                db[ALL_INV_COLLECTION].delete_many({DESIGNER_USERINVKEY:username})
+            
+                db[META_COLLECTION].update_one({META_ID_KEY:META_ID_VALUE},
                     {"$pull": {DESIGNERS_METAKEY: {"$in":[username]}}})
 
+    @staticmethod
+    def add_client(client, user_id=None, user_name=None):
+
+        if user_id:
+
+            user = User.find_user(userid_val=user_id)
+
+            client_key = user.get(USER_CLIENT_USERKEY)
+
+            if client_key:
+
+                User.update_array((USER_CLIENT_USERKEY, client), user_id=user_id, save=True)
+
+                return True
+            
+            else:
+
+                return False
+        
+        else:
+
+            user = User.find_user(username_val=user_name)
+
+            client_key = user.get(USER_CLIENT_USERKEY)
+
+            if client_key:
+
+                User.update_array((USER_CLIENT_USERKEY, client), user_name=user_name, save=True)
+
+                return True
+            
+            else:
+
+                return False
+
+
+
+    @staticmethod
+    def update_array(update_setup: tuple, user_id=None, user_name=None, save=False) -> None:
+
+        """update_setup structure is (key, val). $set deletes the contents."""
+
+        key = update_setup[0]
+        val = update_setup[1]
+
+        if not save:
+
+            if user_name:
+
+                db[USER_COLLECTION].update_one({USERNAME_USERKEY:user_name},
+                {"$set":{key+".$[]":val}})
+
+            else:
+
+                db[USER_COLLECTION].update_one({USER_ID_USERKEY:user_id},
+                {"$set":{key+".$[]":val}})
+
+        else:
+
+            if user_name:
+
+                db[USER_COLLECTION].update_one({USERNAME_USERKEY:user_name},
+                {"$push":{key:val}})
+
+            else:
+
+                db[USER_COLLECTION].update_one({USER_ID_USERKEY:user_id},
+                {"$push":{key:val}})
 
 
     @staticmethod
@@ -186,7 +253,9 @@ class User(UserMixin):
 
             if retval != None and user != None:
 
-                return user[retval]
+                retdata = user.get(retval)
+
+                return retdata
 
             else:
 
@@ -197,7 +266,9 @@ class User(UserMixin):
 
             if retval != None and user != None:
 
-                return user[retval]
+                retdata = user.get(retval)
+
+                return retdata
 
             else:
 
@@ -205,7 +276,7 @@ class User(UserMixin):
 
 
     @staticmethod
-    def check_pass(passwordin_db, passwordto_check):
+    def check_pass(passwordin_db, passwordto_check) -> bool:
         return check_password_hash(passwordin_db, passwordto_check)
 
     @staticmethod

@@ -42,17 +42,17 @@ def strip_text(text: list, turnto_int=False, toStr=False):
 
     if turnto_int:
 
-        for chr in text:
+        for char in text:
             
-            stripped_text = int(sub("[() {}, <> ]", "", chr))
+            stripped_text = int(sub("[() {}, <> ]", "", char))
 
             tagnum_list.append(stripped_text)
 
     if toStr:
 
-        for chr in text:
+        for char in text:
 
-            stripped_text = sub("[() {}, <> ]", "", chr)
+            stripped_text = sub("[() {}, <> ]", "", char)
 
             wordInput += stripped_text
 
@@ -61,9 +61,9 @@ def strip_text(text: list, turnto_int=False, toStr=False):
             
     else:
 
-        for chr in text:
+        for char in text:
 
-            stripped_text = sub("[() {}, <> ]", "", chr)
+            stripped_text = sub("[() {}, <> ]", "", char)
 
             tagnum_list.append(stripped_text)
 
@@ -145,6 +145,8 @@ def update_single_field(data_list: list, keytofind, keytoupdate, valuetoupdate, 
 
 
 def validate_password(pass_to_validate, current_user, db):
+
+    currentuser_password = User
 
     current_user_data = db["Users"].find_one({"username": current_user.username})
 
