@@ -3,9 +3,11 @@ from flask import current_app
 from flask_login import UserMixin
 from flask_pymongo import PyMongo
 from random import randint
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.constants import roles_routes, db_collections,\
-     user_keys, meta_keys, userinv_keys, SEARCH_KEY, NULLVALUE
+     user_keys, meta_keys, userinv_keys, SEARCH_KEY, NULLVALUE, DELIVERED_NO,\
+DELIVERED_YES
+
 from app import ADMIN_PASS,\
      SUPEREMPLOYEE_PASS, EMPLOYEE_PASS, USER_PASS, db
 
@@ -39,8 +41,36 @@ DATE_ENTERED_USERINVKEY = userinv_keys[5]
 IMAGE_NUM_USERINVKEY = userinv_keys[6]
 DESCRIPTION_USERINVKEY = userinv_keys[7]
 LOCATION_USERINVKEY = userinv_keys[8]
-STORAGE_FEES_USERINVKEY = userinv_keys[9]
-PAID_LAST_USERINVKEY = userinv_keys[10]
+DUE_DATE_USERINVKEY = userinv_keys[9]
+UNPAID_STORAGE_USERINVKEY = userinv_keys[10]
+DELIVERED_USERINVKEY = userinv_keys[11]
+DELIVERY_DATE_USERINVKEY = userinv_keys[12]
+#Delivered
+
+
+class StorageOps:
+
+    todays_date = datetime.today()
+
+    @staticmethod
+    def calculate_storage_fees():
+
+        search_data = 
+
+        all_inv = db[ALL_INV_COLLECTION].find({})
+
+        storage_price = MetaOps.find_one(STORAGE_PRICE_METAKEY)
+
+        user_input = input("Type y to continue: ")
+
+        if user_input == "y":
+
+            for row in all_inv:
+
+                volume = row[VOLUME_USERINVKEY]
+
+                per_day_price
+
 
 class AllInvOps:
 
@@ -398,7 +428,8 @@ def init_db():
 
         metadata.insert_one(meta_list)
 
-        
+        tdy_date = datetime.today()
+
         for i in range(user_list_len+1):
 
             designer_list = list(starting_users.keys())
@@ -409,7 +440,7 @@ def init_db():
 
             for j in range(start_ind, inv_size+start_ind):
 
-                print(j)
+                future_date = tdy_date + timedelta(days=j*20) if j > 13 or j < 5 else None
 
                 clientList = starting_users[designer]
 
@@ -422,10 +453,12 @@ def init_db():
                 data = {TAG_NUM_USERINVKEY: j, SHIPMENT_NUM_USERINVKEY: j,\
                 DESIGNER_USERINVKEY: designer, CLIENT_USERINVKEY: client,\
                 VOLUME_USERINVKEY :100,\
-                DATE_ENTERED_USERINVKEY: datetime(2019, i+1, 20),\
+                DATE_ENTERED_USERINVKEY: tdy_date,\
                 IMAGE_NUM_USERINVKEY: 1, DESCRIPTION_USERINVKEY: "A Table",\
                 LOCATION_USERINVKEY: "A"+str(j),\
-                STORAGE_FEES_USERINVKEY: 0, PAID_LAST_USERINVKEY: 0}
+                DUE_DATE_USERINVKEY: None,
+                UNPAID_STORAGE_USERINVKEY: 0, DELIVERED_USERINVKEY:DELIVERED_NO,
+                DELIVERY_DATE_USERINVKEY:future_date}
 
                 inv_data.append(data)
 

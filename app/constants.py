@@ -1,5 +1,5 @@
 
-
+sort_methods = ["specific_client_sum", "all_clients_sum", "individual_items"]
 
 db_collections = ["Users", "MetaData", "AllInv"] #each users' username will be a collection as well
 
@@ -11,10 +11,13 @@ meta_keys = ["meta_id", "db_data", "shipment_num",
 
 userinv_keys = ["_id", "shipment_num", "designer", "client", "volume",
  "date_entered", "image_num", "description", "location",
-  "storage_fees", "paid_last"]
+  "due_date", "unpaid_storage", "delivered", "delivery_date"]
 
 user_keys = ["_id", "username", "password", "roles", "email", "client"]
 
 SEARCH_KEY = "search_method"
 
 NULLVALUE = ("EMPTY", None)
+
+DELIVERED_NO = "no"
+DELIVERED_YES = "yes"
