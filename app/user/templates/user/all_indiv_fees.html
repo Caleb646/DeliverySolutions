@@ -43,26 +43,38 @@
             </div>
         </header>
 
-        <form method="POST" action="">
-            {{ form.hidden_tag() if form.hidden_tag }}
-            {% from 'bootstrap/form.html' import render_field %}
-            <div class="container">
-               <div class="row text-white">
-                    <div class="input-group col-sm-12 col-md-6 col-lg-12 col-xl-12 mt-2 ml-2 mr-2 px-2 py-2">
-                        <div class="form-group">
-                            <h2>Instructions</h2> 
-                            <p>
-                                Choose the way you want your storage fees to be
-                                presented to you.
-                            </p>
-                            {{render_field(form.sort_methods)}}
-                            {{render_field(form.clients)}}
-                            {{render_field(form.submit)}}
-                        </div>
-                    </div>
-                </div>
-            </div>
-                </form>
+<div class="container text-white">
+    <h3>Storage Fees</h3>
+
+    <table class="table text-white">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Id</th>
+            <th scope="col">Client Name</th>
+            <th scope="col">Volume</th>
+            <th scope="col">Date Entered</th>                       
+            <th scope="col">Unpaid Storage</th>
+            <th scope="col">Due Date</th>
+            <th scope="col">Date Last Paid</th>
+          </tr>
+        </thead>
+                {% for choice in data %}
+
+                <tbody>
+                    <tr>
+                        <th scope="row">#</th>
+                        <td>{{choice.get(dbkeys[0])}}</td>
+                        <td>{{choice.get(dbkeys[3])}}</td>
+                        <td>{{choice.get(dbkeys[4])}}</td>
+                        <td>{{choice.get(dbkeys[5])}}</td>
+                        <td>{{choice.get(dbkeys[10])}}</td>
+                    </tr>
+                </tbody>
+                {% endfor %}
+            </table>
+        </div>
+
         {{ link | safe }}
 
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>

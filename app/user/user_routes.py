@@ -1,12 +1,13 @@
 from flask import render_template, redirect, request, url_for, json, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
-from app.user.forms import UserSearch
+from app.user.forms import UserSearch, StorageFeesSearch
 from app.user import user_bp
-from app.database import User, MetaOps, AllInvOps
+from app.database import User, MetaOps, AllInvOps, SortingOps
 from app.user.user_util import search_method
 from app.global_util import user_has_role, strip_text
 from app.constants import meta_keys, user_keys,\
-     userinv_keys, SEARCH_KEY, NULLVALUE
+     userinv_keys,sort_methods, SEARCH_KEY, NULLVALUE
+from types import GeneratorType
 
 #Meta collection keys
 SHIPMENT_NUM_METAKEY = meta_keys[2]
@@ -27,6 +28,9 @@ DESCRIPTION_USERINVKEY = userinv_keys[7]
 LOCATION_USERINVKEY = userinv_keys[8]
 DUE_DATE_USERINVKEY = userinv_keys[9]
 UNPAID_STORAGE_USERINVKEY = userinv_keys[10]
+DELIVERED_USERINVKEY = userinv_keys[11]
+DELIVERY_DATE_USERINVKEY = userinv_keys[12]
+PAID_LAST_DATE_USERINVKEY = userinv_keys[13]
 #User collection keys
 USERNAME_USERKEY = user_keys[1]
 USER_ID_USERKEY = user_keys[0]
@@ -34,6 +38,13 @@ USER_PASSWORD_USERKEY = user_keys[2]
 USER_EMAIL_USERKEY = user_keys[4]
 USER_ROLES_USERKEY = user_keys[3]
 USER_CLIENT_USERKEY = user_keys[5]
+#Sort Methods
+SPECIFIC_CLIENT_SUM = sort_methods[0]
+ALL_CLIENTS_SUM = sort_methods[1]
+INDIVIDUAL_ITEMS = sort_methods[2]
+#Routes for Sorting Methods
+SORTMETHODS_DICT = {SPECIFIC_CLIENT_SUM: "specific_client_sum.html",
+    ALL_CLIENTS_SUM: "all_clients_sum.html", INDIVIDUAL_ITEMS: "all_indiv_fees.html"}
 
 
 @user_bp.route("/", methods=("GET", "POST"), endpoint="user_home")
@@ -96,8 +107,26 @@ def user_view():
 @user_has_role(user=current_user, required_roles=("user"))
 def user_storage_fees():
 
-    data = search_method({DESIGNER_USERINVKEY: current_user.username})
+    form = StorageFeesSearch()
 
-    database_data = AllInvOps.find_all(data)
+    client_list = User.find_user(username_val=current_user.username, retval=USER_CLIENT_USERKEY)
 
-    return render_template("user/storage-fees.html", data=database_data, dbkeys=userinv_keys)
+    form.clients.choices = [(client, client) for client in client_list]
+
+    form.clients.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
+
+    if form.validate_on_submit():
+        #TODO dont create generator create it in the next function
+        chosen_method = form.sort_methods.data
+
+        chosen_client = form.clients.data
+
+        sortingops: GeneratorType = SortingOps.sorting_controller(SPECIFIC_CLIENT_SUM, current_user.username,"CAT")
+
+        print(f'sorting ops: {sortingops}')
+
+        # data = search_method({DESIGNER_USERINVKEY: current_user.username})
+
+        # database_data = AllInvOps.find_all(data)
+
+    return render_template("user/storage-fees.html", form=form)

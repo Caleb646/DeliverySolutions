@@ -11,7 +11,7 @@ meta_keys = ["meta_id", "db_data", "shipment_num",
 
 userinv_keys = ["_id", "shipment_num", "designer", "client", "volume",
  "date_entered", "image_num", "description", "location",
-  "due_date", "unpaid_storage", "delivered", "delivery_date"]
+  "due_date", "unpaid_storage", "delivered", "delivery_date", "paid_last"]
 
 user_keys = ["_id", "username", "password", "roles", "email", "client"]
 

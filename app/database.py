@@ -5,11 +5,11 @@ from flask_pymongo import PyMongo
 from random import randint
 from datetime import datetime, timedelta
 from app.constants import roles_routes, db_collections,\
-     user_keys, meta_keys, userinv_keys, SEARCH_KEY, NULLVALUE, DELIVERED_NO,\
+     user_keys, meta_keys, userinv_keys, sort_methods, SEARCH_KEY, NULLVALUE, DELIVERED_NO,\
 DELIVERED_YES
-
 from app import ADMIN_PASS,\
      SUPEREMPLOYEE_PASS, EMPLOYEE_PASS, USER_PASS, db
+from types import GeneratorType
 
 #Collections
 USER_COLLECTION = db_collections[0]
@@ -45,21 +45,70 @@ DUE_DATE_USERINVKEY = userinv_keys[9]
 UNPAID_STORAGE_USERINVKEY = userinv_keys[10]
 DELIVERED_USERINVKEY = userinv_keys[11]
 DELIVERY_DATE_USERINVKEY = userinv_keys[12]
-#Delivered
+PAID_LAST_DATE_USERINVKEY = userinv_keys[13]
+#Sort Methods
+SPECIFIC_CLIENT_SUM = sort_methods[0]
+ALL_CLIENTS_SUM = sort_methods[1]
+INDIVIDUAL_ITEMS = sort_methods[2]
+
+#TODO fix calculate_storage_fees for the paid_last date
+
+class SortingOps:
+
+    @staticmethod
+    def sorting_controller(sorting_method, username, client=None) -> GeneratorType:
+        """Reroutes generator to views. Chooses which sorting method to use."""
+        if sorting_method == SPECIFIC_CLIENT_SUM:
+
+            SUM = SortingOps.specific_client_sum(username, client)
+
+            return SUM
+
+    @staticmethod
+    def specific_client_sum(username, client) -> GeneratorType:
+
+        """Returns a generator. Sorts the chosen inventory by due date."""
+
+        data_dict = {} #format {due_date:storage_fees}
+
+        search_data = {SEARCH_KEY:(DESIGNER_USERINVKEY, CLIENT_USERINVKEY), 
+        DESIGNER_USERINVKEY: username, CLIENT_USERINVKEY: client}
+
+        db_data = AllInvOps.find_all(search_data)
+
+        for row in db_data:
+
+            due_date = row.get(DUE_DATE_USERINVKEY) if row.get(DUE_DATE_USERINVKEY) != None else "Not Due Yet"
+
+            storage_fee = row.get(UNPAID_STORAGE_USERINVKEY)
+
+            possibly_same_due_date = data_dict.get(due_date)
+
+            if possibly_same_due_date:
+
+                possibly_same_due_date += storage_fee
+
+                data_dict[due_date] = possibly_same_due_date
+
+                yield data_dict
+
+            else:
+
+                data_dict[due_date] = storage_fee
+
+                yield data_dict
 
 
-class StorageOps:
-
-    todays_date = datetime.today()
+class StorageOps: 
 
     @staticmethod
     def calculate_storage_fees():
 
-        search_data = 
-
         all_inv = db[ALL_INV_COLLECTION].find({})
 
         storage_price = MetaOps.find_one(STORAGE_PRICE_METAKEY)
+
+        todays_date = datetime.today()
 
         user_input = input("Type y to continue: ")
 
@@ -67,9 +116,50 @@ class StorageOps:
 
             for row in all_inv:
 
-                volume = row[VOLUME_USERINVKEY]
+                volume = row.get(VOLUME_USERINVKEY)
 
-                per_day_price
+                date_entered = row.get(DATE_ENTERED_USERINVKEY)
+
+                storage_fees_now = row.get(UNPAID_STORAGE_USERINVKEY)
+
+                delivered = row.get(DELIVERED_USERINVKEY)
+
+                per_day_price = volume * storage_price
+
+                delivery_date = row.get(DELIVERY_DATE_USERINVKEY)
+
+                if delivery_date != None:
+
+                    due_date = delivery_date
+
+                    delivered = DELIVERED_YES
+
+                    time_left = delivery_date - date_entered
+
+                    new_storage_fees = time_left.days * per_day_price
+
+                    storage_fees_now += new_storage_fees
+
+                    db[ALL_INV_COLLECTION].update_one({TAG_NUM_USERINVKEY:row[TAG_NUM_USERINVKEY]},
+                    {"$set": {DUE_DATE_USERINVKEY:due_date, DELIVERED_USERINVKEY:delivered,
+                    UNPAID_STORAGE_USERINVKEY:storage_fees_now}})
+
+                else:
+
+                    print(row)
+
+                    time_passed = todays_date - date_entered
+
+                    print(f"time passed: {time_passed.days}")
+
+                    new_storage_fees = time_passed.days * per_day_price
+
+                    storage_fees_now += new_storage_fees
+
+                    print(f"storage fees; {storage_fees_now}")
+
+                    db[ALL_INV_COLLECTION].update_one({TAG_NUM_USERINVKEY:row[TAG_NUM_USERINVKEY]},
+                    {"$set": {UNPAID_STORAGE_USERINVKEY:storage_fees_now}})
 
 
 class AllInvOps:
@@ -428,7 +518,7 @@ def init_db():
 
         metadata.insert_one(meta_list)
 
-        tdy_date = datetime.today()
+        date_entered = datetime(2019, 5, 15)
 
         for i in range(user_list_len+1):
 
@@ -440,7 +530,7 @@ def init_db():
 
             for j in range(start_ind, inv_size+start_ind):
 
-                future_date = tdy_date + timedelta(days=j*20) if j > 13 or j < 5 else None
+                future_date = date_entered + timedelta(days=j*20) if j > 13 or j < 5 else None
 
                 clientList = starting_users[designer]
 
@@ -453,12 +543,13 @@ def init_db():
                 data = {TAG_NUM_USERINVKEY: j, SHIPMENT_NUM_USERINVKEY: j,\
                 DESIGNER_USERINVKEY: designer, CLIENT_USERINVKEY: client,\
                 VOLUME_USERINVKEY :100,\
-                DATE_ENTERED_USERINVKEY: tdy_date,\
+                DATE_ENTERED_USERINVKEY: date_entered,\
                 IMAGE_NUM_USERINVKEY: 1, DESCRIPTION_USERINVKEY: "A Table",\
                 LOCATION_USERINVKEY: "A"+str(j),\
                 DUE_DATE_USERINVKEY: None,
                 UNPAID_STORAGE_USERINVKEY: 0, DELIVERED_USERINVKEY:DELIVERED_NO,
-                DELIVERY_DATE_USERINVKEY:future_date}
+                DELIVERY_DATE_USERINVKEY:future_date,
+                PAID_LAST_DATE_USERINVKEY: None}
 
                 inv_data.append(data)
 

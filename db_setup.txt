@@ -40,7 +40,7 @@ meta_keys = [db_data, shipment_num, tag_num, designers, user_id, editable_fields
 "client": "JILL", "volume": 100, "date_entered": date(2019, 5, 10), \
 "image_num": 2, "description": "A Table", "location": "B4",
 "due_date": None or date(2019, 6, 10), "unpaid_storage": 0,
-"delivered": "no", "delivery_date": None or datetime}
+"delivered": "no", "delivery_date": None or datetime, "paid_last":None}
 
 //End
 

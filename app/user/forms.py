@@ -29,4 +29,6 @@ class StorageFeesSearch(FlaskForm):
                                 (INDIVIDUAL_ITEMS, INDIVIDUAL_ITEMS)],\
                                 validators=[validators.optional()])
 
+    clients = fields.SelectField("Pick Client:")
+
     submit = fields.SubmitField("Submit")
