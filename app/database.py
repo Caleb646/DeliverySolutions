@@ -48,7 +48,7 @@ PAID_LAST_DATE_USERINVKEY = userinv_keys[13]
 #Sort Methods
 SPECIFIC_CLIENT_SUM = sort_methods[0]
 ALL_CLIENTS_SUM = sort_methods[1]
-INDIVIDUAL_ITEMS = sort_methods[2]
+ALL_INDIVIDUAL_ITEMS_SUM = sort_methods[2]
 
 #TODO fix calculate_storage_fees for the paid_last date
 
@@ -62,6 +62,57 @@ class SortingOps:
             SUM = SortingOps.specific_client_sum(username, client)
 
             return SUM
+
+        if sorting_method == ALL_CLIENTS_SUM:
+
+            SUM = SortingOps.all_clients_sum(username)
+
+            return SUM
+
+        if sorting_method == ALL_INDIVIDUAL_ITEMS_SUM:
+
+            SUM = SortingOps.all_individual_items_sum
+
+            return SUM
+
+    @staticmethod
+    def all_clients_sum(username) -> dict:
+
+        data_dict = {} #format {due_date: storage_fees}
+
+        search_data = {SEARCH_KEY:(DESIGNER_USERINVKEY,), 
+        DESIGNER_USERINVKEY: username}
+
+        db_data = AllInvOps.find_all(search_data)
+
+        diff_due_date_counter = 0
+
+        for row in db_data:
+            due_date = row.get(DUE_DATE_USERINVKEY) if row.get(DUE_DATE_USERINVKEY) != None else "Not Due Yet " + str(diff_due_date_counter)
+
+            storage_fee = row.get(UNPAID_STORAGE_USERINVKEY)
+
+            client = row.get(CLIENT_USERINVKEY)
+
+            possibly_same_due_date: list = data_dict.get(due_date)
+
+            possibly_same_client: str = possibly_same_due_date[1] if possibly_same_due_date != None else None
+
+            #checks if there is already a matching due date if so, checks whether the clients match too
+
+            if possibly_same_due_date and possibly_same_client == client:
+
+                possibly_same_due_date[0] += storage_fee
+
+                data_dict[due_date] = possibly_same_due_date              
+
+            else:
+                data_dict[due_date] = [storage_fee, client]
+
+                diff_due_date_counter += 1
+
+        return data_dict
+
 
     @staticmethod
     def specific_client_sum(username, client) -> dict:
