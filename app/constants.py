@@ -1,5 +1,7 @@
 
 sort_methods = ["specific_client_sum", "all_clients_sum", "individual_items"]
+SORTMETHOD_KEY = "sort_method"
+
 
 db_collections = ["Users", "MetaData", "AllInv"] #each users' username will be a collection as well
 

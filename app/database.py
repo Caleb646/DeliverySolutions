@@ -9,7 +9,6 @@ from app.constants import roles_routes, db_collections,\
 DELIVERED_YES
 from app import ADMIN_PASS,\
      SUPEREMPLOYEE_PASS, EMPLOYEE_PASS, USER_PASS, db
-from types import GeneratorType
 
 #Collections
 USER_COLLECTION = db_collections[0]
@@ -56,7 +55,7 @@ INDIVIDUAL_ITEMS = sort_methods[2]
 class SortingOps:
 
     @staticmethod
-    def sorting_controller(sorting_method, username, client=None) -> GeneratorType:
+    def sorting_controller(sorting_method, username, client=None) -> dict:
         """Reroutes generator to views. Chooses which sorting method to use."""
         if sorting_method == SPECIFIC_CLIENT_SUM:
 
@@ -65,7 +64,7 @@ class SortingOps:
             return SUM
 
     @staticmethod
-    def specific_client_sum(username, client) -> GeneratorType:
+    def specific_client_sum(username, client) -> dict:
 
         """Returns a generator. Sorts the chosen inventory by due date."""
 
@@ -90,13 +89,15 @@ class SortingOps:
 
                 data_dict[due_date] = possibly_same_due_date
 
-                yield data_dict
+                
 
             else:
 
                 data_dict[due_date] = storage_fee
 
-                yield data_dict
+        return data_dict
+
+                
 
 
 class StorageOps: 

@@ -6,8 +6,7 @@ from app.database import User, MetaOps, AllInvOps, SortingOps
 from app.user.user_util import search_method
 from app.global_util import user_has_role, strip_text
 from app.constants import meta_keys, user_keys,\
-     userinv_keys,sort_methods, SEARCH_KEY, NULLVALUE
-from types import GeneratorType
+     userinv_keys, sort_methods, SEARCH_KEY, NULLVALUE, SORTMETHOD_KEY
 
 #Meta collection keys
 SHIPMENT_NUM_METAKEY = meta_keys[2]
@@ -116,17 +115,45 @@ def user_storage_fees():
     form.clients.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
 
     if form.validate_on_submit():
-        #TODO dont create generator create it in the next function
+
         chosen_method = form.sort_methods.data
 
         chosen_client = form.clients.data
 
-        sortingops: GeneratorType = SortingOps.sorting_controller(SPECIFIC_CLIENT_SUM, current_user.username,"CAT")
+        data_dict = {SORTMETHOD_KEY:chosen_method,
+        DESIGNER_USERINVKEY:current_user.username,
+        CLIENT_USERINVKEY:chosen_client}
 
-        print(f'sorting ops: {sortingops}')
+        json_dict = json.dumps(data_dict)
+    
 
-        # data = search_method({DESIGNER_USERINVKEY: current_user.username})
-
-        # database_data = AllInvOps.find_all(data)
+        return redirect(url_for("user.user_show_fees", data=json_dict))
 
     return render_template("user/storage-fees.html", form=form)
+
+
+@user_bp.route("/show-fees", methods=("GET", "POST"), endpoint="user_show_fees")
+@login_required
+@user_has_role(user=current_user, required_roles=("user"))
+def user_show_fees():
+
+    json_dict = request.args["data"]
+
+    data_dict = json.loads(json_dict)
+
+    sort_method = data_dict.get(SORTMETHOD_KEY)
+
+    client = data_dict.get(CLIENT_USERINVKEY)
+
+    designer = data_dict.get(DESIGNER_USERINVKEY)
+
+    title = "Storage Fees for: " + client if client not in NULLVALUE else "Storage Fees"
+
+    db_data: dict = SortingOps.sorting_controller(sort_method, designer, client)
+
+    #picks what template path to use
+    sort_template = SORTMETHODS_DICT.get(sort_method)
+
+
+
+    return render_template("user/"+sort_template, data=db_data, dbkeys=userinv_keys, title=title)
