@@ -24,11 +24,11 @@ class UserSearch(FlaskForm):
 class StorageFeesSearch(FlaskForm):
 
     sort_methods = fields.SelectField("Sorting Methods:",\
-                            choices=[(SPECIFIC_CLIENT_SUM, SPECIFIC_CLIENT_SUM),\
-                                (ALL_CLIENTS_SUM, ALL_CLIENTS_SUM),\
-                                (INDIVIDUAL_ITEMS, INDIVIDUAL_ITEMS)],\
+                            choices=[(SPECIFIC_CLIENT_SUM, "Specific Client Fees Sum"),\
+                                (ALL_CLIENTS_SUM, "All Clients Fees Summed"),\
+                                (INDIVIDUAL_ITEMS, "Items Summed Individually")],\
                                 validators=[validators.optional()])
 
-    clients = fields.SelectField("Pick Client:")
+    clients = fields.SelectField("")
 
     submit = fields.SubmitField("Submit")

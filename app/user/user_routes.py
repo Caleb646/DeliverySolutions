@@ -112,8 +112,6 @@ def user_storage_fees():
 
     form.clients.choices = [(client, client) for client in client_list]
 
-    form.clients.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
-
     if form.validate_on_submit():
 
         chosen_method = form.sort_methods.data
@@ -129,7 +127,7 @@ def user_storage_fees():
 
         return redirect(url_for("user.user_show_fees", data=json_dict))
 
-    return render_template("user/storage-fees.html", form=form)
+    return render_template("user/storage-fees.html", form=form, clients=client_list)
 
 
 @user_bp.route("/show-fees", methods=("GET", "POST"), endpoint="user_show_fees")
@@ -147,7 +145,7 @@ def user_show_fees():
 
     designer = data_dict.get(DESIGNER_USERINVKEY)
 
-    title = "Storage Fees for: " + client if client not in NULLVALUE else "Storage Fees"
+    title = "Storage Fees for: " + client if sort_method == SPECIFIC_CLIENT_SUM else "Storage Fees"
 
     db_data: dict = SortingOps.sorting_controller(sort_method, designer, client)
 
