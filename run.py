@@ -521,74 +521,74 @@ from werkzeug.security import generate_password_hash
 #User Views Start
 
 
-@app.route("/user/home", methods=("GET", "POST"), endpoint="user_home")
-@login_required
-@user_has_role(user=current_user, required_roles=("user"))
-def user_home():
-    return render_template("user/home.html")
+# @app.route("/user/home", methods=("GET", "POST"), endpoint="user_home")
+# @login_required
+# @user_has_role(user=current_user, required_roles=("user"))
+# def user_home():
+#     return render_template("user/home.html")
 
 
-@app.route("/user/search", methods=("GET", "POST"), endpoint="user_search")
-@login_required
-@user_has_role(user=current_user, required_roles=("user"))
-def user_search():
+# @app.route("/user/search", methods=("GET", "POST"), endpoint="user_search")
+# @login_required
+# @user_has_role(user=current_user, required_roles=("user"))
+# def user_search():
 
-    currentuser_data = db["Users"].find_one({"_id": current_user._id})
+#     currentuser_data = db["Users"].find_one({"_id": current_user._id})
 
-    client_list = currentuser_data["clients"]
+#     client_list = currentuser_data["clients"]
 
-    form = UserSearch()
+#     form = UserSearch()
 
-    form.client.choices = [(client, client) for client in client_list]
+#     form.client.choices = [(client, client) for client in client_list]
 
-    if form.validate_on_submit():
+#     if form.validate_on_submit():
 
-        tag_num = form.tag_num.data
-        shipment_num = form.shipment_num.data
-        client = form.client.data
+#         tag_num = form.tag_num.data
+#         shipment_num = form.shipment_num.data
+#         client = form.client.data
 
-        data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": current_user.username, "Client": client}
+#         data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": current_user.username, "Client": client}
 
-        json_dict = json.dumps(data_dict)
+#         json_dict = json.dumps(data_dict)
 
-        return redirect(url_for(".user_view", data=json_dict))
+#         return redirect(url_for(".user_view", data=json_dict))
 
-    return render_template("user/search.html", form=form)
-
-
-@app.route("/user/view", methods=("GET", "POST"), endpoint="user_view")
-@login_required
-@user_has_role(user=current_user, required_roles=("user"))
-def user_view():
-
-    json_data = request.args["data"]
-
-    search_data = json.loads(json_data)
-
-    database_data, title = database_search(search_data, db)
-
-    for val in database_data:
-
-        if val["Paid Last"] != "None" or None:
-
-            val["Paid Last"] = val["Paid Last"].date()
-
-    return render_template("user/view.html", title=title, data=database_data)
+#     return render_template("user/search.html", form=form)
 
 
-@app.route("/user/storage-fees", methods=("GET", "POST"), endpoint="user_storage_fees")
-@login_required
-@user_has_role(user=current_user, required_roles=("user"))
-def user_storage_fees():
+# @app.route("/user/view", methods=("GET", "POST"), endpoint="user_view")
+# @login_required
+# @user_has_role(user=current_user, required_roles=("user"))
+# def user_view():
 
-    data_dict = {"Designer": current_user.username,
-                 "Client": "None",
-                 "tag num": "None",
-                 "shipment num": "None"}
+#     json_data = request.args["data"]
 
-    database_data, title = database_search(data_dict, db)
+#     search_data = json.loads(json_data)
 
-    return render_template("user/view.html", title=title, data=database_data)
+#     database_data, title = database_search(search_data, db)
+
+#     for val in database_data:
+
+#         if val["Paid Last"] != "None" or None:
+
+#             val["Paid Last"] = val["Paid Last"].date()
+
+#     return render_template("user/view.html", title=title, data=database_data)
+
+
+# @app.route("/user/storage-fees", methods=("GET", "POST"), endpoint="user_storage_fees")
+# @login_required
+# @user_has_role(user=current_user, required_roles=("user"))
+# def user_storage_fees():
+
+#     data_dict = {"Designer": current_user.username,
+#                  "Client": "None",
+#                  "tag num": "None",
+#                  "shipment num": "None"}
+
+#     database_data, title = database_search(data_dict, db)
+
+#     return render_template("user/view.html", title=title, data=database_data)
 
 
 #User Views End

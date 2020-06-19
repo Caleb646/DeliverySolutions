@@ -57,6 +57,9 @@ try:
     from app.user.user_routes import user_bp
     app.register_blueprint(user_bp, url_prefix="/user")
 
+    from app.super_employee.super_employee_routes import super_employee_bp
+    app.register_blueprint(super_employee_bp, url_prefix="/super_employee")
+
     from app import database, forms, global_util
 
 except (ImportError, ImportWarning) as e:
