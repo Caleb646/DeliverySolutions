@@ -56,7 +56,7 @@ class SortingOps:
 
     @staticmethod
     def sorting_controller(sorting_method, username, client=None) -> dict:
-        """Reroutes generator to views. Chooses which sorting method to use."""
+        """Reroutes db_dict to views. Chooses which sorting method to use."""
         if sorting_method == SPECIFIC_CLIENT_SUM:
 
             SUM = SortingOps.specific_client_sum(username, client)
@@ -71,7 +71,7 @@ class SortingOps:
 
         if sorting_method == ALL_INDIVIDUAL_ITEMS_SUM:
 
-            SUM = SortingOps.all_individual_items_sum
+            SUM = SortingOps.all_individual_items_sum(username)
 
             return SUM
 
@@ -117,7 +117,7 @@ class SortingOps:
     @staticmethod
     def specific_client_sum(username, client) -> dict:
 
-        """Returns a generator. Sorts the chosen inventory by due date."""
+        """Returns a dict. Sorts the chosen inventory by due date."""
 
         data_dict = {} #format {due_date:storage_fees}
 
@@ -138,15 +138,25 @@ class SortingOps:
 
                 possibly_same_due_date += storage_fee
 
-                data_dict[due_date] = possibly_same_due_date
-
-                
+                data_dict[due_date] = possibly_same_due_date               
 
             else:
 
                 data_dict[due_date] = storage_fee
 
         return data_dict
+
+    @staticmethod
+    def all_individual_items_sum(username):
+
+        """Returns a mongo cursor."""
+
+        search_data = {SEARCH_KEY:(DESIGNER_USERINVKEY,),
+        DESIGNER_USERINVKEY:username}
+
+        db_dict = AllInvOps.find_all(search_data)
+
+        return db_dict
 
                 
 

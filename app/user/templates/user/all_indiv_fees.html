@@ -56,7 +56,7 @@
             <th scope="col">Date Entered</th>                       
             <th scope="col">Unpaid Storage</th>
             <th scope="col">Due Date</th>
-            <th scope="col">Date Last Paid</th>
+            <th scope="col">Delivered?</th>
           </tr>
         </thead>
                 {% for choice in data %}
@@ -69,6 +69,8 @@
                         <td>{{choice.get(dbkeys[4])}}</td>
                         <td>{{choice.get(dbkeys[5])}}</td>
                         <td>{{choice.get(dbkeys[10])}}</td>
+                        <td>{{choice.get(dbkeys[9])}}</td>
+                        <td>{{choice.get(dbkeys[11])}}</td>
                     </tr>
                 </tbody>
                 {% endfor %}
