@@ -96,7 +96,7 @@ form.onsubmit = function submitted() {
         if(i+1 >= rowCount) {
             //added return false so browser would redirect.
             let dataJson = JSON.stringify(allData);
-            window.location.href = "http://127.0.0.1:5000/super_employee/add-inv/success?data="+dataJson;
+            window.location.href = "https://calebthomas.herokuapp.com/super_employee/add-inv/success?data="+dataJson;
             return false;
         }
 
