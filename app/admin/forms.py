@@ -15,6 +15,9 @@ class SearchForm(FlaskForm):
 
     submit = fields.SubmitField("Submit")
 
+    def validate(self):#stops flask form from flagging dynamically added items
+        return True
+
 
 class MultiCheckboxField(SelectMultipleField):
 

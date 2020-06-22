@@ -60,6 +60,9 @@ try:
     from app.super_employee.super_employee_routes import super_employee_bp
     app.register_blueprint(super_employee_bp, url_prefix="/super_employee")
 
+    from app.employee.employee_routes import employee_bp
+    app.register_blueprint(employee_bp, url_prefix="/employee")
+
     from app import database, forms, global_util
 
 except (ImportError, ImportWarning) as e:

@@ -185,11 +185,7 @@ def admin_manage_users():
 
         data = request.form.getlist("user-data")
 
-        print(f"data: {data}")
-
         user_id: int = int(data[0])
-
-        print(f"user id: {user_id}")
 
         if len(data) == 1:        
 

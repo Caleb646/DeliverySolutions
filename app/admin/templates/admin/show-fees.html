@@ -50,32 +50,30 @@
                     <legend class="border-bottom mb-4">Current Storage Fees</legend>
                     <table class="table text-white">
                         <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Id</th>
-                            <th scope="col">Designer Name</th>
-                            <th scope="col">Client Name</th>
-                            <th scope="col">Date Entered</th>
-                            <th scope="col">Storage Fees</th>
-                            <th scope="col">Unpaid Storage</th>
-                        </tr>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Id</th>
+                                <th scope="col">Client Name</th>
+                                <th scope="col">Volume</th>
+                                <th scope="col">Date Entered</th>                       
+                                <th scope="col">Unpaid Storage</th>
+                                <th scope="col">Due Date</th>
+                                <th scope="col">Delivered?</th>
+                              </tr>
                         </thead>
 
             {% for choice in data %}
                 <div class="form-check text-white">  
                         <tbody>
                             <tr>
-                            <th scope="row"> <input  class="form-check-input" type="checkbox" id="defaultCheck1" name="inv-data" value={{choice.get(dbkeys[0])}}></th>
-                            <td>{{choice.get(dbkeys[0])}}</td>
-                            
-                            <td>{{choice.get(dbkeys[2])}}</td>
-                            <td>{{choice.get(dbkeys[3])}}</td>
-                           
-                            <td>{{choice.get(dbkeys[5])}}</td>
-                            
-                            <td>{{choice.get(dbkeys[9])}}</td>
-                            <td>{{choice.get(dbkeys[10])}}</td>
-                            
+                                <th scope="row">#</th>
+                                <td>{{choice.get(dbkeys[0])}}</td>
+                                <td>{{choice.get(dbkeys[3])}}</td>
+                                <td>{{choice.get(dbkeys[4])}}</td>
+                                <td>{{choice.get(dbkeys[5])}}</td>
+                                <td>{{choice.get(dbkeys[10])}}</td>
+                                <td>{{choice.get(dbkeys[9])}}</td>
+                                <td>{{choice.get(dbkeys[11])}}</td>
                             </tr>
                         </tbody>
                 

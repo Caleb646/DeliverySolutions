@@ -47,17 +47,17 @@
  <form method="POST" action="">
 
     {{ form.hidden_tag() }}
-
+    {% from 'bootstrap/form.html' import render_field %}
      <div class="container text-white">
 
         <div class="row text-white">
                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 mt-4">
                     <h2>Select Designer</h2>
                         <div class="input-group mb-3">
-                            {{ form.designers}}
+                            {{ render_field(form.designer)}}
                         </div>
                         <div class="input-group mb-3">
-                            {{ form.clients }}
+                            {{ render_field(form.client) }}
                         </div>
                         <div class="input-group-append">
                             <button class="btn btn-secondary" type="submit" name="bsubmit" value="Change User Info">Submit</button>
@@ -70,32 +70,11 @@
     </form>
 
         {{ link | safe }}
-        <script>
-            let designer_select = document.getElementById("designers");
-            let client_select = document.getElementById("clients");
-            designer_select.onchange = function() {
-                designer = designer_select.value;
-
-                fetch("/super_employee/add-inv/" + designer).then(function(response) {
-                   response.json().then(function(data) {
-
-                        let optionHTML = "";
-
-                        for(let client of data.clients) {
-                            optionHTML += "<option value=''" + client + ">" + client + "</option>";
-
-                        }
-
-                        client_select.innerHTML = optionHTML;
-
-                       });
-                });
-            }
-        </script>
 
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <script src="static/super_employee/js/search.js"></script>
     </body>
     
 </html>

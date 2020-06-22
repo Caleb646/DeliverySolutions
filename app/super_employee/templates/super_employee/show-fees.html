@@ -46,38 +46,43 @@
         <div class="container text-white">
             <form method="POST" action="">
                 <fieldset class="form-group">
-                    <b>{{message}}</b>
-                    <legend class="border-bottom mb-4">{{title}}</legend>
+                    <b></b>
+                    <legend class="border-bottom mb-4">Storage Fees for {{data[0].get(dbkeys[2])}}</legend>
 
-                        <table class="table text-white">
-                            <thead>
+                    <table class="table text-white">
+                        <thead>
                             <tr>
                                 <th scope="col">#</th>
                                 <th scope="col">Id</th>
-                                <th scope="col">Designer Name</th>
                                 <th scope="col">Client Name</th>
-                                <th scope="col">Date Entered</th>
+                                <th scope="col">Volume</th>
+                                <th scope="col">Date Entered</th>                       
                                 <th scope="col">Unpaid Storage</th>
+                                <th scope="col">Due Date</th>
+                                <th scope="col">Delivered?</th>
+                              </tr>
+                        </thead>
+
+            
+                <div class="form-check text-white">  
+                    {% for choice in data %}
+                        <tbody>
+                            <tr>
+                                <th scope="row">#</th>
+                                <td>{{choice.get(dbkeys[0])}}</td>
+                                <td>{{choice.get(dbkeys[3])}}</td>
+                                <td>{{choice.get(dbkeys[4])}}</td>
+                                <td>{{choice.get(dbkeys[5])}}</td>
+                                <td>{{choice.get(dbkeys[10])}}</td>
+                                <td>{{choice.get(dbkeys[9])}}</td>
+                                <td>{{choice.get(dbkeys[11])}}</td>
                             </tr>
-                            </thead>
+                        </tbody>
+                    {% endfor %}
+                </div>
+            
 
-                {% for choice in data %}
-                    <div class="form-check text-white">  
-                            <tbody>
-                                <tr>
-                                <th scope="row"> <input  class="form-check-input" type="checkbox" id="defaultCheck1" name="inv-data" value={{choice[0]}}></th>
-                                <td>{{choice[0]}}</td>
-                                <td>{{choice[1]}}</td>
-                                <td>{{choice[2]}}</td>
-                                <td>{{choice[3]}}</td>
-                                <td>{{choice[4]}}</td>
-                                </tr>
-                            </tbody>
-                    
-                    </div>
-                {% endfor %}
-
-            </table>
+        </table>
 
                 </fieldset>
             </form>

@@ -6,7 +6,7 @@ from app.global_util import strip_text, user_has_role
 from app.constants import meta_keys, user_keys,\
      userinv_keys, SEARCH_KEY, NULLVALUE
 from app import login_manager
-from app.super_employee.form import SearchForm
+from app.super_employee.form import SearchForm, EditForm, StorageFees, AddForm
 from app.super_employee.super_util import search_method
 
 #Meta collection keys
@@ -61,10 +61,11 @@ def super_employee_search():
     form = SearchForm()
     designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
     form.designer.choices = [(designer, designer) for designer in designer_list]
-    form.designer.choices.insert(0, (NULLVALUE[0], NULLVALUE[0],))
+    form.designer.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
     form.client.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
 
     if form.validate_on_submit():
+    #if request.method == "POST":
 
         tag_num = form.tag_num.data
         shipment_num = form.shipment_num.data
@@ -81,157 +82,129 @@ def super_employee_search():
     return render_template("super_employee/search.html", form=form)
 
 
-# @app.route("/super_employee/edit", methods=("GET", "POST"), endpoint="super_employee_edit")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("super_employee"))
-# def super_employee_edit():
-#     """The format of the json data sent
-#     to this function by /admin/search/ {"tag num": tag_num,
-#     "shipment num": shipment_num,
-#     "Designer": designer, "Client": client}.
-#     """
+@super_employee_bp.route("/edit", methods=("GET", "POST"), endpoint="super_employee_edit")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_edit():
 
-#     json_data = request.args["data"]
-#     search_data = json.loads(json_data)
+    """"""
 
-#     database_data, title = database_search(search_data, db)
-#     formatted_data = formatter(database_data)
+    json_data = request.args["data"]
+    database_data = AllInvOps.find_all(json.loads(json_data))
 
-#     form = EditForm()
-#     form.choices.choices = formatted_data
+    form = EditForm()
+    form.choices.choices = database_data
 
-#     print(formatted_data)
+    designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
+    form.designer.choices = [(designer, designer) for designer in designer_list]
 
-#     meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
-#     designer_list = meta_data["Designers"]
-#     form.movetto_field.choices = [(designer, designer) for designer in designer_list]
+    client_list = User.find_user(username_val=designer_list[0], retval=USER_CLIENT_USERKEY)
+    form.client.choices = [(client, client) for client in client_list]
 
-#     client_data = db["Users"].find_one({"username": designer_list[0]})
-#     client_list = client_data["clients"]
-#     form.client.choices = [(client, client) for client in client_list]
+    if form.validate_on_submit():
 
-#     if form.validate_on_submit():
+        if form.move.data:
 
-#         if request.form["bsubmit"] == "Move To":
-#             designer = form.movetto_field.data
+            designer = form.movetto_field.data
 
-#             client = form.client.data
+            client = form.client.data
 
-#             data = request.form.getlist("inv-data")
+            data = request.form.getlist("inv-data")
 
-#             tagnum_list = strip_text(data, turnto_int=True)
+            tagnum_list = strip_text(data, turnto_int=True)
 
-#             moveby_tagnum(designer, client, tagnum_list, db)
+            AllInvOps.update_all(tagnum_list, mainkey=TAG_NUM_USERINVKEY,
+            update_keys=(DESIGNER_USERINVKEY, CLIENT_USERINVKEY), 
+            update_vals=(designer, client))
 
-#             return redirect(url_for(".super_employee_search"))
+            return redirect(url_for("super_employee.super_employee_search"))
 
-#         if request.form["bsubmit"] == "Delete":
+        if form.delete.data:
 
-#             data = request.form.getlist("inv-data")
+            data = request.form.getlist("inv-data")
 
-#             tagnum_list = strip_text(data, turnto_int=True)
+            tagnum_list = strip_text(data, turnto_int=True)
 
-#             deleteby_tagnum(tagnum_list, db)
+            AllInvOps.delete_all(tagnum_list, keytodel=TAG_NUM_USERINVKEY)
 
-#             return redirect(url_for(".super_employee_search"))
+            return redirect(url_for("super_employee.super_employee_search"))
 
-#     return render_template("super-employee/edit.html", form=form, title=title)
+    return render_template("super_employee/edit.html", form=form, dbkeys=userinv_keys)
 
 
 
-# @app.route("/super_employee/storage-fees", methods=("GET", "POST"), endpoint="super_employee_storage_fees")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("super_employee"))
-# def super_employee_storage_fees():
+@super_employee_bp.route("/storage-fees", methods=("GET", "POST"), endpoint="super_employee_storage_fees")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_storage_fees():
 
-#     meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
+    
 
-#     designer_list = meta_data["Designers"]
+    form = StorageFees()
 
-#     form = StorageFees()
+    designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
+    form.designer.choices = [(designer, designer) for designer in designer_list]
 
-#     form.designers.choices = [(designer, designer) for designer in designer_list]
+    client_list = User.find_user(username_val=designer_list[0], retval=USER_CLIENT_USERKEY)
+    client_list.insert(0, NULLVALUE[0])
+    form.client.choices = [(client, client) for client in client_list]
 
-#     client_data = db["Users"].find_one({"username": designer_list[0]})
+    if form.validate_on_submit():
 
-#     client_list = client_data['clients']
+        designer = form.designer.data
 
-#     client_list.insert(0, "None")
+        client = form.client.data
 
-#     form.clients.choices = [(client, client) for client in client_list]
+        search_data = json.dumps(search_method({DESIGNER_USERINVKEY:designer, CLIENT_USERINVKEY:client}))
 
-#     if form.validate_on_submit():
+        return redirect(url_for("super_employee.super_employee_show_fees", data=search_data))
 
-#         designer = form.designers.data
-
-#         client = form.clients.data
-
-#         data = json.dumps({"Designer": designer, "Client": client})
-
-#         return redirect(url_for(".super_employee_show_fees", data=data))
-
-#     return render_template("super-employee/storage-fees.html", form=form)
+    return render_template("super_employee/storage-fees.html", form=form)
 
 
-# @app.route("/super_employee/show-fees", methods=("GET", "POST"), endpoint="super_employee_show_fees")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("super_employee"))
-# def super_employee_show_fees():
+@super_employee_bp.route("/show-fees", methods=("GET", "POST"), endpoint="super_employee_show_fees")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_show_fees():
 
-#     json_data = request.args["data"]
+    json_data = request.args["data"]
+    search_data = AllInvOps.find_all(json.loads(json_data))
 
-#     search_data = json.loads(json_data)
+    return render_template("super_employee/show-fees.html", data=search_data, dbkeys=userinv_keys)
 
+@super_employee_bp.route("/add-inv", methods=("GET", "POST"), endpoint="super_employee_add_inv")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_add_inv():
 
-#     db_data, title = database_search(search_data, db)
+    form = AddForm()
 
-#     title = "Current Storage Fees for " + title
+    designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
+    form.designer.choices = [(designer, designer) for designer in designer_list]
+    form.designer.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
+    form.client.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
 
-
-#     show_data = [(row["_id"], row["Designer"], row["Client"], row['Date Entered'],
-#                   row["Storage Fees"])
-#                   for row in db_data]
-
-#     return render_template("super-employee/show-fees.html", data=show_data, title=title)
-
-# @app.route("/super_employee/add-inv", methods=("GET", "POST"), endpoint="super_employee_add_inv")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("super_employee"))
-# def super_employee_add_inv():
-
-#     form = AddForm()
-
-#     meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
-#     designer_list = meta_data["Designers"]
-#     form.designer.choices = [(designer, designer) for designer in designer_list]
-#     form.designer.choices.insert(0, ('None', 'None'))
-#     form.client.choices.insert(0, ('None', 'None'))
-
-#     return render_template("super-employee/add-inv.html", form=form)
+    return render_template("super_employee/add-inv.html", form=form)
 
 
-# @app.route("/super_employee/add-inv/success", methods=("GET", "POST"), endpoint="super_employee_add_inv_success")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("super_employee"))
-# def super_employee_add_inv_success():
+@super_employee_bp.route("/add-inv/success", methods=("GET", "POST"), endpoint="super_employee_add_inv_success")
+@login_required
+@user_has_role(user=current_user, required_roles=("super_employee"))
+def super_employee_add_inv_success():
 
-#     """Grabs the entered data from the previous page and files it away 
-#     into the database. The designer and client are located at the very
-#     beginning of the first list. [[designer, client]] """
+    """Grabs the entered data from the previous page and files it away 
+    into the database. The designer and client are located at the very
+    beginning of the first list. [[designer, client]] """
 
-#     print("at success page")
+    rawdata_list = request.args.get("data")
 
-#     rawdata_list = request.args.get("data")
+    datalist = json.loads(rawdata_list)
+    print(datalist)
+    user_list = datalist.pop(0)
+    print(user_list)
+    AllInvOps.enter_all(data_list=datalist, users=user_list)
 
-#     print("data list", rawdata_list)
-
-#     datalist = json.loads(rawdata_list)
-
-#     user_list = datalist.pop(0)
-
-#     enter_data(datalist, user_list, db)
-
-#     return render_template("super-employee/add-inv-success.html", designer=user_list[0])
+    return render_template("super_employee/add-inv-success.html", designer=user_list[0])
  
 
 @super_employee_bp.route("/add-inv/<designer>", endpoint="chosen_designer_super_employee")
@@ -239,18 +212,9 @@ def super_employee_search():
 @user_has_role(user=current_user, required_roles=("super_employee", "employee"))
 def chosen_designer_super_employee(designer):
 
-    """This func works with the admin_search function and the javascript n search.html.
-    In search.html, when a designerfrom the designer dropdown list is selected
-    the javascript in search.html picks up thedesigner and fetches this url /admin/search + designer.
-    With the designer name this func is able to query the database and grab the clients associated with
-    it. This func then jsons the db response and returns it so the js can grab it unjson it
-    and add the client names to the selectfield."""
-
-    js_Array = []
+    """"""
 
     client_list = User.find_user(username_val=designer, retval=CLIENT_USERINVKEY)
-
-    print(client_list)
 
     if client_list is None:
 
@@ -260,4 +224,4 @@ def chosen_designer_super_employee(designer):
 
         client_list.insert(0, NULLVALUE[0])
 
-        return jsonify({"clients": js_Array})
+        return jsonify({"clients": client_list})

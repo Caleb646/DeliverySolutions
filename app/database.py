@@ -227,6 +227,48 @@ class StorageOps:
 class AllInvOps:
 
     @staticmethod
+    def enter_all(data_list, users: list):
+        """
+        data_list format: ['', 'Volume', 'Desc', 'Location', 'Image number']
+
+        userinv_keys = 
+            ["_id", "shipment_num", "designer", "client", "volume",
+            "date_entered", "image_num", "description", "location",
+            "due_date", "unpaid_storage", "delivered", 
+            "delivery_date", "paid_last"]
+
+        """
+        meta_data = MetaOps.find_one()
+        currentShipnum = meta_data[SHIPMENT_NUM_METAKEY]
+        currentTagnum = meta_data[TAG_NUM_METAKEY]
+        #setup vars
+        todays_date = datetime.today()
+        designer = users[0]
+        client = users[1]
+        total_inv_data = []
+
+        for data in data_list:
+
+            data_dict = {TAG_NUM_USERINVKEY:currentTagnum,
+                SHIPMENT_NUM_USERINVKEY:currentShipnum,
+                DESIGNER_USERINVKEY:designer, CLIENT_USERINVKEY:client,
+                VOLUME_USERINVKEY:data[1], DATE_ENTERED_USERINVKEY:todays_date,
+                IMAGE_NUM_USERINVKEY: data[4], DESCRIPTION_USERINVKEY:data[2],
+                LOCATION_USERINVKEY: data[3], DUE_DATE_USERINVKEY:None,
+                UNPAID_STORAGE_USERINVKEY:0, DELIVERED_USERINVKEY:DELIVERED_NO,
+                PAID_LAST_DATE_USERINVKEY:None}
+
+            total_inv_data.append(data_dict)
+
+            currentShipnum += 1
+            currentTagnum += 1
+
+        MetaOps.update_multiple({SHIPMENT_NUM_METAKEY: currentShipnum, 
+        TAG_NUM_METAKEY: currentTagnum})
+
+        db[ALL_INV_COLLECTION].insert_many(total_inv_data)
+
+    @staticmethod
     def find_all(search_data: dict) -> list: 
         
         db_key: tuple = search_data.get(SEARCH_KEY)
@@ -281,17 +323,29 @@ class AllInvOps:
 class MetaOps:
 
     @staticmethod
-    def find_one(keyto_find):
+    def find_one(keyto_find=None):
 
         ret: dict = db[META_COLLECTION].find_one({META_ID_KEY:META_ID_VALUE})
 
-        return ret[keyto_find]
+        if keyto_find:
+
+            return ret[keyto_find]
+        
+        else:
+
+            return ret
 
     @staticmethod
     def update_val(newvalue, key):
 
         db[META_COLLECTION].update_one({META_ID_KEY:META_ID_VALUE},
                 {"$set":{key:newvalue}})
+
+    @staticmethod
+    def update_multiple(key_val: dict):
+
+        db[META_COLLECTION].update_one({META_ID_KEY:META_ID_VALUE},
+                {"$set":key_val})
 
 
 class User(UserMixin):

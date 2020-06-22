@@ -9,8 +9,8 @@ let client_select = document.getElementById("client");
                         let optionHTML = "";
 
                         for(let client of data.clients) {
-                            console.log(client);
-                            optionHTML += "<option value=" + client + ">" + client + "</option>";
+                            console.log(typeof(client));
+                            optionHTML += "<option value="+client+">"+client+"</option>";
 
                         }
 
