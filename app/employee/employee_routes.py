@@ -6,7 +6,7 @@ from app.global_util import strip_text, user_has_role
 from app.constants import meta_keys, user_keys,\
      userinv_keys, SEARCH_KEY, NULLVALUE
 from app import login_manager
-from app.employee.forms import SearchForm, EditForm, StorageFees, AddForm
+from app.employee.forms import SearchForm, AddForm
 from app.employee.employee_util import search_method
 
 #Meta collection keys
@@ -38,7 +38,7 @@ USER_CLIENT_USERKEY = user_keys[5]
 
 
 
-@app.route("/home", endpoint="employee_home")
+@employee_bp.route("/home", endpoint="employee_home")
 @login_required
 @user_has_role(user=current_user, required_roles=("employee"))
 def employee_home():
@@ -46,98 +46,85 @@ def employee_home():
    return render_template("employee/home.html")
 
 
-@app.route("/employee/add-inv", endpoint="employee_add_inv")
+@employee_bp.route("/add-inv", endpoint="employee_add_inv")
 @login_required
 @user_has_role(user=current_user, required_roles=("employee"))
 def employee_add_inv():
 
     form = AddForm()
-
-    meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
-    designer_list = meta_data["Designers"]
+    designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
     form.designer.choices = [(designer, designer) for designer in designer_list]
-    form.designer.choices.insert(0, ('None', 'None'))
-    form.client.choices.insert(0, ('None', 'None'))
+    form.designer.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
+    form.client.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
 
     return render_template("employee/add-inv.html", form=form)
 
 
-# @app.route("/employee/add-inv/success", methods=("GET", "POST"), endpoint="employee_add_inv_success")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("employee"))
-# def employee_add_inv_success():
+@employee_bp.route("/add-inv/success", methods=("GET", "POST"), endpoint="employee_add_inv_success")
+@login_required
+@user_has_role(user=current_user, required_roles=("employee"))
+def employee_add_inv_success():
 
-#     """Grabs the entered data from the previous page and files it away 
-#     into the database. The designer and client are located at the very
-#     beginning of the first list. [[designer, client]] """
+    """Grabs the entered data from the previous page and files it away 
+    into the database. The designer and client are located at the very
+    beginning of the first list. [[designer, client]] """
 
-#     print("at success page")
+    rawdata_list = request.args.get("data")
 
-#     rawdata_list = request.args.get("data")
+    datalist = json.loads(rawdata_list)
 
-#     print("data list", rawdata_list)
+    user_list = datalist.pop(0)
 
-#     datalist = json.loads(rawdata_list)
+    AllInvOps.enter_all(data_list=datalist, users=user_list)
 
-#     user_list = datalist.pop(0)
-
-#     enter_data(datalist, user_list, db)
-
-#     return render_template("employee/add-inv-success.html", designer=user_list[0])
+    return render_template("employee/add-inv-success.html", designer=user_list[0])
 
 
-# @app.route("/employee/search", methods=("GET", "POST"), endpoint="employee_search")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("employee"))
-# def employee_search():
+@employee_bp.route("/search", methods=("GET", "POST"), endpoint="employee_search")
+@login_required
+@user_has_role(user=current_user, required_roles=("employee"))
+def employee_search():
 
-#     """Allows the admin to search the database using either a designer/client name or
-#     tag/shipment number. This function renders the search.html which has two dropdown
-#     lists. The first, the designer list will be populated with names from the
-#     database upon the page being rendered. The client list will be populated once a
-#     designer is selected. This func works in tandem with chosen_designer. Once the form has
-#     been validated the results will be jsoned and the user will be redirected to the
-#     admin_edit func."""
+    """Allows the admin to search the database using either a designer/client name or
+    tag/shipment number. This function renders the search.html which has two dropdown
+    lists. The first, the designer list will be populated with names from the
+    database upon the page being rendered. The client list will be populated once a
+    designer is selected. This func works in tandem with chosen_designer. Once the form has
+    been validated the results will be jsoned and the user will be redirected to the
+    admin_edit func."""
 
-#     form = SearchForm()
+    form = SearchForm()
 
-#     meta_data = db["MetaData"].find_one({"Name": "Designer Info"})
-#     designer_list = meta_data["Designers"]
-#     form.designer.choices = [(designer, designer) for designer in designer_list]
-#     form.designer.choices.insert(0, ('None', 'None'))
-#     form.client.choices.insert(0, ('None', 'None'))
+    designer_list = MetaOps.find_one(DESIGNERS_METAKEY)
+    form.designer.choices = [(designer, designer) for designer in designer_list]
+    form.designer.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
+    form.client.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
 
-#     if form.validate_on_submit():
+    if form.validate_on_submit():
 
-#         tag_num = form.tag_num.data
-#         shipment_num = form.shipment_num.data
-#         designer = form.designer.data
-#         client = form.client.data
+        tag_num = form.tag_num.data
+        shipment_num = form.shipment_num.data
+        designer = form.designer.data
+        client = form.client.data
 
-#         data_dict = {"tag num": tag_num, "shipment num": shipment_num, "Designer": designer, "Client": client}
+        data_dict = search_method({TAG_NUM_USERINVKEY:tag_num, 
+        SHIPMENT_NUM_USERINVKEY:shipment_num, DESIGNER_USERINVKEY:designer,
+        CLIENT_USERINVKEY:client})
 
-#         json_dict = json.dumps(data_dict)
+        json_dict = json.dumps(data_dict)
 
-#         return redirect(url_for(".employee_view", data=json_dict))
+        return redirect(url_for("employee.employee_view", data=json_dict))
 
-#     return render_template("employee/search.html", form=form)
+    return render_template("employee/search.html", form=form)
 
 
-# @app.route("/employee/view", methods=("GET", "POST"), endpoint="employee_view")
-# @login_required
-# @user_has_role(user=current_user, required_roles=("employee"))
-# def employee_view():
+@employee_bp.route("/view", methods=("GET", "POST"), endpoint="employee_view")
+@login_required
+@user_has_role(user=current_user, required_roles=("employee"))
+def employee_view():
 
-#     json_data = request.args["data"]
+    json_data = request.args["data"]
 
-#     search_data = json.loads(json_data)
+    search_data = AllInvOps.find_all(json.loads(json_data))
 
-#     database_data, title = database_search(search_data, db)
-
-#     for val in database_data:
-
-#         if val["Paid Last"] != "None" and val["Paid Last"] != None:
-
-#             val["Paid Last"] = val["Paid Last"].date()
-
-#     return render_template("employee/view.html", title=title, data=database_data)
+    return render_template("employee/view.html", data=search_data, dbkeys=userinv_keys)

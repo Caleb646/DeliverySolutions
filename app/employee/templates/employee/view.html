@@ -45,37 +45,52 @@
         </header>
 
 <div class="container text-white">
-    <h3>{{title}}</h3>
-    <h4>{{message}}</h4>
+    <h3>Current Inventory</h3>
 
     <table class="table text-white">
-        <thead>
+      <thead>
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">Tag Number</th>
-            <th scope="col">Shipment Number</th>
-            <th scope="col">Client</th>
-            <th scope="col">Description</th>
-            <th scope="col">Storage Fees</th>
-            <th scope="col">Date Entered</th>
-            <th scope="col">Date Last Paid</th>
+              <th scope="col">#</th>
+              <th scope="col">Id</th>
+              <th scope="col">Shipment Number</th>
+              <th scope="col">Designer Name</th>
+              <th scope="col">Client Name</th>
+              <th scope="col">Volume</th>
+              <th scope="col">Date Entered</th>
+              <th scope="col">Image Number</th>
+              <th scope="col">Description</th>
+              <th scope="col">Location</th>
+              <th scope="col">Due Date</th>                         
+              <th scope="col">Unpaid Storage</th>
           </tr>
-        </thead>
-                {% for choice in data %}
+      </thead>
 
-                <tbody>
-                    <tr>
-                      <th scope="row">#</th>
-                      <td>{{choice['_id']}}</td>
-                      <td>{{choice['shipment num']}}</td>
-                      <td>{{choice['Client']}}</td>
-                      <td>{{choice['Description']}}</td>
-                      <td>{{choice['Storage Fees']}}</td>
-                      <td>{{choice['Date Entered'].date()}}</td>
-                      <td>{{choice['Paid Last']}}</td>
-                    </tr>
-                </tbody>
-                {% endfor %}
+  {% for choice in data %}
+
+  <div class="form-check text-white">
+
+      <tbody>
+          
+          <tr>
+              
+              <th scope="row"><input type="checkbox" id="vehicle1" name="inv-data" value={{choice.get(dbkeys[0])}}></th>
+              <td>{{choice.get(dbkeys[0])}}</td>
+              <td>{{choice.get(dbkeys[1])}}</td>
+              <td>{{choice.get(dbkeys[2])}}</td>
+              <td>{{choice.get(dbkeys[3])}}</td>
+              <td>{{choice.get(dbkeys[4])}}</td>
+              <td>{{choice.get(dbkeys[5])}}</td>
+              <td>{{choice.get(dbkeys[6])}}</td>
+              <td>{{choice.get(dbkeys[7])}}</td>
+              <td>{{choice.get(dbkeys[8])}}</td>
+              <td>{{choice.get(dbkeys[9])}}</td>
+              <td>{{choice.get(dbkeys[10])}}</td>
+          </tr>
+          
+      </tbody>
+
+  </div>
+  {% endfor %}
             </table>
         </div>
 

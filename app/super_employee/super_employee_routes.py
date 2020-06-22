@@ -65,7 +65,6 @@ def super_employee_search():
     form.client.choices.insert(0, (NULLVALUE[0], NULLVALUE[0]))
 
     if form.validate_on_submit():
-    #if request.method == "POST":
 
         tag_num = form.tag_num.data
         shipment_num = form.shipment_num.data
